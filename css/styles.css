@@ -1,0 +1,1080 @@
+/* ==========================================================================
+   BLACKHEARTH GAMES — Studio Website
+   Fantasy tavern aesthetic — warm, cozy, where adventures begin
+   ========================================================================== */
+
+/* ===== RESET & BASE ===== */
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  /* Depth palette — tavern darkness, warm charcoal & timber */
+  --void: #0a0806;
+  --abyss: #110e0a;
+  --obsidian: #1a1610;
+  --shadow: #241e16;
+  --dusk: #302820;
+  --iron: #3c3228;
+
+  /* Gold spectrum — candlelight & firelight */
+  --gold: #d4a040;
+  --gold-bright: #f0d080;
+  --gold-dim: #9a7830;
+  --gold-pale: rgba(212, 160, 64, 0.10);
+  --gold-glow: rgba(212, 160, 64, 0.25);
+
+  /* Hearth spectrum — the fireplace */
+  --hearth: #b84820;
+  --hearth-bright: #d46030;
+  --hearth-glow: rgba(184, 72, 32, 0.25);
+
+  /* Ember spectrum — sparks from the fire */
+  --ember: #d07028;
+  --ember-dim: #905018;
+  --ember-glow: rgba(208, 112, 40, 0.25);
+
+  /* Text hierarchy — parchment tones */
+  --text-bright: #ede5d6;
+  --text-body: #c8bca8;
+  --text-muted: #8a7e68;
+
+  /* Layout tokens */
+  --max-w: 1100px;
+  --nav-h: 72px;
+  --section-py: 8rem;
+  --section-px: 2rem;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: 'EB Garamond', 'Georgia', serif;
+  font-size: 18px;
+  line-height: 1.75;
+  color: var(--text-body);
+  background: var(--abyss);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Film grain overlay */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+a {
+  color: var(--gold);
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+a:hover {
+  color: var(--gold-bright);
+}
+
+::selection {
+  background: var(--gold);
+  color: var(--void);
+}
+
+/* Accessibility — skip link */
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: 1rem;
+  padding: 0.5rem 1rem;
+  background: var(--gold);
+  color: var(--void);
+  font-family: 'Cinzel', serif;
+  font-size: 0.85rem;
+  z-index: 10000;
+  border-radius: 0 0 4px 4px;
+}
+
+.skip-link:focus {
+  top: 0;
+}
+
+:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+}
+
+/* ===== LAYOUT ===== */
+.container {
+  max-width: var(--max-w);
+  margin: 0 auto;
+  padding: 0 var(--section-px);
+}
+
+
+/* ==========================================================================
+   NAVIGATION
+   ========================================================================== */
+
+.nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--nav-h);
+  z-index: 1000;
+  background: rgba(17, 14, 10, 0.4);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid transparent;
+  transition: background 0.4s ease, border-color 0.4s ease;
+}
+
+.nav.is-scrolled {
+  background: rgba(17, 14, 10, 0.95);
+  border-bottom-color: rgba(212, 160, 64, 0.08);
+}
+
+.nav__inner {
+  max-width: var(--max-w);
+  margin: 0 auto;
+  padding: 0 var(--section-px);
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.nav__logo {
+  font-family: 'Cinzel Decorative', 'Cinzel', serif;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--text-bright);
+  opacity: 0.85;
+  transition: opacity 0.3s ease;
+}
+
+.nav__logo:hover {
+  opacity: 1;
+  color: var(--text-bright);
+}
+
+/* Hidden checkbox toggle */
+.nav__toggle {
+  display: none;
+}
+
+.nav__hamburger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  cursor: pointer;
+  padding: 8px;
+  z-index: 10;
+}
+
+.nav__hamburger span {
+  display: block;
+  width: 22px;
+  height: 2px;
+  background: var(--gold);
+  transition: transform 0.3s ease, opacity 0.3s ease;
+  transform-origin: center;
+}
+
+.nav__links {
+  display: flex;
+  align-items: center;
+  gap: 2.5rem;
+  list-style: none;
+}
+
+.nav__links a {
+  font-family: 'Cinzel', serif;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  position: relative;
+  padding: 0.25rem 0;
+  transition: color 0.3s ease;
+}
+
+.nav__links a::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background: var(--gold);
+  transition: width 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.nav__links a:hover {
+  color: var(--gold);
+}
+
+.nav__links a:hover::after {
+  width: 100%;
+}
+
+
+/* ==========================================================================
+   HERO
+   ========================================================================== */
+
+.hero {
+  position: relative;
+  height: 100vh;
+  height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* --- Tavern atmosphere --- */
+.hero__tavern {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background:
+    /* Hearth glow — warm light radiating up from the fireplace */
+    radial-gradient(ellipse at 50% 98%, rgba(208, 112, 40, 0.30) 0%, transparent 45%),
+    radial-gradient(ellipse at 50% 85%, rgba(184, 72, 32, 0.15) 0%, transparent 55%),
+    /* Ambient warmth filling the room */
+    radial-gradient(ellipse at 50% 60%, rgba(160, 100, 40, 0.06) 0%, transparent 70%),
+    /* Torch glow — left wall */
+    radial-gradient(ellipse at 12% 35%, rgba(212, 160, 64, 0.05) 0%, transparent 30%),
+    /* Torch glow — right wall */
+    radial-gradient(ellipse at 88% 35%, rgba(212, 160, 64, 0.05) 0%, transparent 30%),
+    /* Dark stone/timber base */
+    linear-gradient(to bottom, var(--void) 0%, var(--obsidian) 60%, var(--shadow) 100%);
+}
+
+/* Pulsing hearth glow — fire breathing */
+.hero__hearth-glow {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 50% 100%, rgba(208, 112, 40, 0.18) 0%, transparent 45%),
+    radial-gradient(ellipse at 50% 95%, rgba(184, 72, 32, 0.10) 0%, transparent 55%);
+  animation: hearth-pulse 4s ease-in-out infinite alternate;
+}
+
+/* Bottom edge fade to page background */
+.hero__tavern::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 20%;
+  background: linear-gradient(to bottom, transparent, var(--abyss));
+  pointer-events: none;
+}
+
+/* --- Ember particles --- */
+.hero__embers {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 80%;
+  z-index: 2;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.ember {
+  position: absolute;
+  bottom: -10px;
+  border-radius: 50%;
+  opacity: 0;
+  animation: ember-rise linear infinite;
+}
+
+/* Gold embers */
+.ember:nth-child(even) {
+  background: var(--gold);
+  box-shadow: 0 0 6px var(--gold-glow);
+}
+
+/* Warm orange embers */
+.ember:nth-child(odd) {
+  background: var(--ember);
+  box-shadow: 0 0 6px var(--ember-glow);
+}
+
+/* Embers clustered near center — rising from the hearth */
+.ember:nth-child(1)  { left: 38%; width: 2px; height: 2px; animation-duration: 9s;   animation-delay: 0s; }
+.ember:nth-child(2)  { left: 45%; width: 3px; height: 3px; animation-duration: 12s;  animation-delay: 2.5s; }
+.ember:nth-child(3)  { left: 52%; width: 2px; height: 2px; animation-duration: 10s;  animation-delay: 4.2s; }
+.ember:nth-child(4)  { left: 48%; width: 3px; height: 3px; animation-duration: 8.5s; animation-delay: 1.3s; }
+.ember:nth-child(5)  { left: 55%; width: 2px; height: 2px; animation-duration: 11s;  animation-delay: 3.7s; }
+.ember:nth-child(6)  { left: 42%; width: 3px; height: 3px; animation-duration: 7.5s; animation-delay: 5.5s; }
+.ember:nth-child(7)  { left: 60%; width: 2px; height: 2px; animation-duration: 13s;  animation-delay: 6.8s; }
+.ember:nth-child(8)  { left: 35%; width: 2px; height: 2px; animation-duration: 10.5s; animation-delay: 7.2s; }
+.ember:nth-child(9)  { left: 50%; width: 2px; height: 2px; animation-duration: 9.5s; animation-delay: 0.8s; }
+.ember:nth-child(10) { left: 46%; width: 3px; height: 3px; animation-duration: 11.5s; animation-delay: 4.8s; }
+.ember:nth-child(11) { left: 57%; width: 2px; height: 2px; animation-duration: 8s;   animation-delay: 2.1s; }
+.ember:nth-child(12) { left: 40%; width: 2px; height: 2px; animation-duration: 10s;  animation-delay: 6.1s; }
+
+/* --- Hero content --- */
+.hero__content {
+  position: relative;
+  z-index: 3;
+  text-align: center;
+  padding: 0 2rem;
+}
+
+/* Firelight glow behind the logo */
+.hero__content::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -55%);
+  width: 600px;
+  height: 350px;
+  background: radial-gradient(ellipse,
+    rgba(212, 160, 64, 0.14) 0%,
+    rgba(208, 112, 40, 0.06) 40%,
+    transparent 70%);
+  animation: firelight-breathe 6s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.hero__logo {
+  width: min(500px, 80vw);
+  height: auto;
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  margin: 0 auto 2rem;
+  position: relative;
+  filter: drop-shadow(0 0 25px rgba(212, 160, 64, 0.18));
+  animation: logo-glow 4.5s ease-in-out infinite;
+}
+
+.hero__tagline {
+  font-family: 'Cinzel', serif;
+  font-size: clamp(0.8rem, 2vw, 1.05rem);
+  font-weight: 400;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 1.5rem;
+}
+
+/* Ornamental divider: line — diamond — line */
+.hero__ornament {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.hero__ornament-line {
+  display: block;
+  width: 60px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold-dim), transparent);
+}
+
+.hero__ornament-diamond {
+  display: block;
+  width: 6px;
+  height: 6px;
+  border: 1px solid var(--gold-dim);
+  transform: rotate(45deg);
+}
+
+/* Scroll indicator */
+.hero__scroll-cue {
+  position: absolute;
+  bottom: 2.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3;
+  width: 1px;
+  height: 48px;
+  overflow: hidden;
+}
+
+.hero__scroll-line {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to bottom, transparent, var(--gold), transparent);
+  animation: scroll-slide 2.2s ease-in-out infinite;
+}
+
+
+/* ==========================================================================
+   SECTIONS — Shared styles
+   ========================================================================== */
+
+.section {
+  padding: var(--section-py) 0;
+  position: relative;
+}
+
+.section__header {
+  text-align: center;
+  margin-bottom: 4rem;
+}
+
+.section__label {
+  display: block;
+  font-family: 'Cinzel', serif;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: var(--gold-dim);
+  margin-bottom: 0.75rem;
+}
+
+.section__title {
+  font-family: 'Cinzel Decorative', 'Cinzel', serif;
+  font-size: clamp(1.5rem, 4vw, 2.3rem);
+  font-weight: 700;
+  color: var(--text-bright);
+  line-height: 1.25;
+}
+
+/* Section ornament: line — dot — line */
+.section__ornament {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  margin-top: 1.25rem;
+}
+
+.ornament-line {
+  display: block;
+  width: 40px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold-dim), transparent);
+}
+
+.ornament-dot {
+  display: block;
+  width: 4px;
+  height: 4px;
+  background: var(--gold-dim);
+  border-radius: 50%;
+}
+
+
+/* ==========================================================================
+   ABOUT
+   ========================================================================== */
+
+.about__content {
+  max-width: 720px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.about__lead {
+  font-size: 1.25rem;
+  color: var(--text-bright);
+  line-height: 1.85;
+  margin-bottom: 1.5rem;
+  font-style: italic;
+}
+
+.about__content p + p {
+  margin-top: 1rem;
+}
+
+
+/* ==========================================================================
+   GAMES
+   ========================================================================== */
+
+.games {
+  background:
+    linear-gradient(to bottom,
+      var(--abyss),
+      var(--obsidian) 15%,
+      var(--obsidian) 85%,
+      var(--abyss));
+}
+
+.game-card {
+  display: grid;
+  grid-template-columns: 1fr 1.3fr;
+  gap: 3rem;
+  align-items: center;
+  background: linear-gradient(135deg, var(--shadow) 0%, var(--obsidian) 100%);
+  border: 1px solid rgba(212, 160, 64, 0.10);
+  padding: 2.5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Subtle firelight radiance inside the card */
+.game-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 25% 50%, var(--hearth-glow) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.game-card__frame {
+  position: relative;
+}
+
+.game-card__art {
+  aspect-ratio: 4 / 3;
+  background: radial-gradient(ellipse at center, var(--shadow) 0%, var(--void) 100%);
+  border: 2px solid var(--gold-dim);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Inner glow inside the art frame */
+.game-card__art::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(212, 160, 64, 0.06) 0%, transparent 65%);
+}
+
+/* Gilded corner accents */
+.game-card__art::after {
+  content: '';
+  position: absolute;
+  inset: 6px;
+  border: 1px solid rgba(212, 160, 64, 0.08);
+  pointer-events: none;
+}
+
+.game-card__logo {
+  width: 120px;
+  height: auto;
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  filter: drop-shadow(0 0 25px rgba(208, 112, 40, 0.4));
+  position: relative;
+  z-index: 1;
+  animation: logo-glow 4.5s ease-in-out infinite;
+}
+
+.game-card__info {
+  position: relative;
+  z-index: 1;
+}
+
+.game-card__title {
+  font-family: 'Cinzel Decorative', serif;
+  font-size: clamp(1.2rem, 3vw, 1.7rem);
+  font-weight: 700;
+  color: var(--text-bright);
+  margin-bottom: 0.5rem;
+}
+
+.game-card__genre {
+  display: block;
+  font-family: 'Cinzel', serif;
+  font-size: 0.65rem;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gold-dim);
+  margin-bottom: 1.25rem;
+}
+
+.game-card__desc {
+  margin-bottom: 1.5rem;
+  line-height: 1.8;
+}
+
+.game-card__features {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+}
+
+.game-card__features span {
+  font-family: 'Cinzel', serif;
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 0.4rem 0.8rem;
+  border: 1px solid rgba(212, 160, 64, 0.18);
+  color: var(--gold);
+  background: rgba(212, 160, 64, 0.04);
+  transition: background 0.3s ease, border-color 0.3s ease;
+}
+
+.game-card__features span:hover {
+  background: rgba(212, 160, 64, 0.08);
+  border-color: rgba(212, 160, 64, 0.3);
+}
+
+.game-card__actions {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+
+/* ==========================================================================
+   BUTTONS
+   ========================================================================== */
+
+.btn {
+  display: inline-block;
+  font-family: 'Cinzel', serif;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 0.8rem 1.8rem;
+  border: 1px solid;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.btn--gold {
+  border-color: var(--gold);
+  color: var(--gold);
+  background: rgba(212, 160, 64, 0.06);
+}
+
+.btn--gold:hover {
+  background: var(--gold);
+  color: var(--void);
+  box-shadow: 0 0 24px var(--gold-glow);
+}
+
+.btn--hearth {
+  border-color: var(--hearth);
+  color: var(--hearth-bright);
+  background: rgba(184, 72, 32, 0.06);
+}
+
+.btn--hearth:hover {
+  background: var(--hearth);
+  color: var(--text-bright);
+  box-shadow: 0 0 24px var(--hearth-glow);
+}
+
+
+/* ==========================================================================
+   PHILOSOPHY
+   ========================================================================== */
+
+.philosophy__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+}
+
+.philosophy__card {
+  text-align: center;
+  padding: 2.5rem 2rem;
+  border: 1px solid rgba(212, 160, 64, 0.06);
+  background: linear-gradient(180deg, rgba(36, 30, 22, 0.5) 0%, rgba(17, 14, 10, 0.5) 100%);
+  transition: border-color 0.4s ease, transform 0.4s ease, box-shadow 0.4s ease;
+}
+
+.philosophy__card:hover {
+  border-color: rgba(212, 160, 64, 0.18);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+/* Diamond ornament icon */
+.philosophy__icon {
+  width: 28px;
+  height: 28px;
+  margin: 0 auto 1.5rem;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.philosophy__icon::before {
+  content: '';
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border: 1px solid var(--gold);
+  transform: rotate(45deg);
+}
+
+.philosophy__icon::after {
+  content: '';
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border: 1px solid var(--gold-dim);
+  transform: rotate(45deg);
+}
+
+.philosophy__heading {
+  font-family: 'Cinzel', serif;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-bright);
+  letter-spacing: 0.06em;
+  margin-bottom: 1rem;
+}
+
+.philosophy__card p {
+  font-size: 0.95rem;
+  line-height: 1.8;
+  color: var(--text-muted);
+}
+
+
+/* ==========================================================================
+   FOOTER
+   ========================================================================== */
+
+.footer {
+  padding: 4rem 2rem 2.5rem;
+  border-top: 1px solid rgba(212, 160, 64, 0.06);
+}
+
+.footer__inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2.5rem;
+  flex-wrap: wrap;
+}
+
+.footer__text {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  text-align: center;
+}
+
+.footer__brand {
+  flex-shrink: 0;
+}
+
+.footer__logo {
+  width: 280px;
+  height: auto;
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  opacity: 0.5;
+  transition: opacity 0.3s ease;
+}
+
+.footer__brand:hover .footer__logo {
+  opacity: 0.85;
+}
+
+.footer__nav {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.footer__nav a {
+  font-family: 'Cinzel', serif;
+  font-size: 0.65rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  transition: color 0.3s ease;
+}
+
+.footer__nav a:hover {
+  color: var(--gold);
+}
+
+.footer__dot {
+  color: var(--text-muted);
+  opacity: 0.3;
+}
+
+.footer__copy {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  opacity: 0.5;
+}
+
+
+/* ==========================================================================
+   SCROLL REVEAL
+   ========================================================================== */
+
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(28px);
+  transition:
+    opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+[data-reveal].is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Staggered reveal for sibling elements */
+[data-reveal]:nth-child(2) { transition-delay: 0.12s; }
+[data-reveal]:nth-child(3) { transition-delay: 0.24s; }
+[data-reveal]:nth-child(4) { transition-delay: 0.36s; }
+
+
+/* ==========================================================================
+   ANIMATIONS
+   ========================================================================== */
+
+@keyframes hearth-pulse {
+  0%   { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+
+@keyframes firelight-breathe {
+  0%, 100% {
+    transform: translate(-50%, -55%) scale(1);
+    opacity: 0.6;
+  }
+  50% {
+    transform: translate(-50%, -55%) scale(1.15);
+    opacity: 1;
+  }
+}
+
+@keyframes logo-glow {
+  0%, 100% {
+    filter: drop-shadow(0 0 20px rgba(212, 160, 64, 0.14));
+  }
+  50% {
+    filter:
+      drop-shadow(0 0 35px rgba(212, 160, 64, 0.28))
+      drop-shadow(0 0 70px rgba(208, 112, 40, 0.12));
+  }
+}
+
+@keyframes ember-rise {
+  0% {
+    opacity: 0;
+    transform: translateY(0) translateX(0);
+  }
+  6% {
+    opacity: 0.7;
+  }
+  25% {
+    transform: translateY(-16vh) translateX(12px);
+  }
+  50% {
+    opacity: 0.35;
+    transform: translateY(-32vh) translateX(-8px);
+  }
+  75% {
+    transform: translateY(-50vh) translateX(16px);
+    opacity: 0.15;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-65vh) translateX(4px);
+  }
+}
+
+@keyframes scroll-slide {
+  0%   { transform: translateY(-100%); }
+  100% { transform: translateY(100%); }
+}
+
+
+/* ==========================================================================
+   REDUCED MOTION
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  [data-reveal] {
+    opacity: 1;
+    transform: none;
+  }
+
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+
+/* ==========================================================================
+   RESPONSIVE
+   ========================================================================== */
+
+/* Tablet */
+@media (max-width: 900px) {
+  :root {
+    --section-py: 5.5rem;
+  }
+
+  .game-card {
+    grid-template-columns: 1fr;
+    text-align: center;
+    gap: 2rem;
+  }
+
+  .game-card__art {
+    max-width: 400px;
+    margin: 0 auto;
+  }
+
+  .game-card__features {
+    justify-content: center;
+  }
+
+  .game-card__actions {
+    justify-content: center;
+  }
+
+  .philosophy__grid {
+    grid-template-columns: 1fr;
+    max-width: 520px;
+    margin: 0 auto;
+  }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .nav__hamburger {
+    display: flex;
+  }
+
+  .nav__links {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 260px;
+    flex-direction: column;
+    background: rgba(17, 14, 10, 0.98);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    padding: 5rem 2rem 2rem;
+    gap: 1.5rem;
+    transform: translateX(100%);
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    border-left: 1px solid rgba(212, 160, 64, 0.08);
+  }
+
+  .nav__toggle:checked ~ .nav__links {
+    transform: translateX(0);
+  }
+
+  .nav__toggle:checked ~ .nav__hamburger span:nth-child(1) {
+    transform: rotate(45deg) translate(5px, 5px);
+  }
+
+  .nav__toggle:checked ~ .nav__hamburger span:nth-child(2) {
+    opacity: 0;
+  }
+
+  .nav__toggle:checked ~ .nav__hamburger span:nth-child(3) {
+    transform: rotate(-45deg) translate(5px, -5px);
+  }
+
+  .hero__logo {
+    width: min(340px, 85vw);
+  }
+
+  .hero__tagline {
+    letter-spacing: 0.18em;
+  }
+
+  .section__header {
+    margin-bottom: 3rem;
+  }
+}
+
+/* Small mobile */
+@media (max-width: 480px) {
+  :root {
+    --section-py: 4rem;
+    --section-px: 1.25rem;
+  }
+
+  body {
+    font-size: 16px;
+  }
+
+  .game-card {
+    padding: 1.5rem;
+  }
+
+  .game-card__actions {
+    flex-direction: column;
+  }
+
+  .btn {
+    text-align: center;
+    width: 100%;
+  }
+
+  .footer__inner {
+    flex-direction: column;
+  }
+
+  .footer__text {
+    align-items: center;
+  }
+
+  .footer__brand {
+    align-self: center;
+  }
+
+  .footer__nav {
+    gap: 0.75rem;
+  }
+
+  .footer__dot {
+    display: none;
+  }
+}
