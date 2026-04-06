@@ -368,8 +368,6 @@ a:hover {
 .hero__logo {
   width: min(500px, 80vw);
   height: auto;
-  image-rendering: pixelated;
-  image-rendering: -moz-crisp-edges;
   margin: 0 auto 2rem;
   position: relative;
   filter: drop-shadow(0 0 25px rgba(212, 160, 64, 0.18));
@@ -793,8 +791,6 @@ a:hover {
 .footer__logo {
   width: 280px;
   height: auto;
-  image-rendering: pixelated;
-  image-rendering: -moz-crisp-edges;
   opacity: 0.5;
   transition: opacity 0.3s ease;
 }
