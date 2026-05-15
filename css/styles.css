@@ -245,8 +245,9 @@ a:hover {
 
 .hero {
   position: relative;
-  height: 100vh;
-  height: 100dvh;
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding-top: var(--nav-h);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -355,8 +356,8 @@ a:hover {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -55%);
-  width: 600px;
-  height: 350px;
+  width: min(90vw, calc((100dvh - var(--nav-h)) * 1.8));
+  height: min(55vh, calc((100dvh - var(--nav-h)) * 0.85));
   background: radial-gradient(ellipse,
     rgba(212, 160, 64, 0.14) 0%,
     rgba(208, 112, 40, 0.06) 40%,
@@ -365,10 +366,13 @@ a:hover {
   pointer-events: none;
 }
 
+/* Logo scales with both viewport width AND available vertical space
+   (viewport height minus the fixed nav), so it grows to fill the screen
+   on big monitors but never bleeds past the header or off the sides. */
 .hero__logo {
-  width: min(500px, 80vw);
+  width: min(85vw, calc((100dvh - var(--nav-h)) * 1.5));
   height: auto;
-  margin: 0 auto 2rem;
+  margin: 0 auto clamp(1rem, 3vh, 2.5rem);
   position: relative;
   filter: drop-shadow(0 0 25px rgba(212, 160, 64, 0.18));
   animation: logo-glow 4.5s ease-in-out infinite;
@@ -376,7 +380,7 @@ a:hover {
 
 .hero__tagline {
   font-family: 'Cinzel', serif;
-  font-size: clamp(0.8rem, 2vw, 1.05rem);
+  font-size: clamp(0.85rem, min(1.9vw, 2.6vh), 1.5rem);
   font-weight: 400;
   letter-spacing: 0.28em;
   text-transform: uppercase;
@@ -1015,10 +1019,6 @@ a:hover {
 
   .nav__toggle:checked ~ .nav__hamburger span:nth-child(3) {
     transform: rotate(-45deg) translate(5px, -5px);
-  }
-
-  .hero__logo {
-    width: min(340px, 85vw);
   }
 
   .hero__tagline {
