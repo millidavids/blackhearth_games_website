@@ -25,7 +25,7 @@
   <link rel="preload" as="font" type="font/woff2" href="fonts/MonaspaceKrypton-Var.woff2" crossorigin>
   <link rel="preload" as="font" type="font/woff2" href="fonts/PressStart2P-Regular.woff2" crossorigin>
 
-  <link rel="stylesheet" href="css/styles.css?v=49">
+  <link rel="stylesheet" href="css/styles.css?v=59">
 
   <script>
     // Restore the user's color scheme synchronously to prevent a dark/light flash
@@ -117,11 +117,6 @@
         </dl>
         <p class="prose">David is a solo developer building the fantasy games he wants to play. Court Wizard began as a hobby project. it grew. it is now a thing worth sharing.</p>
         <p class="prose">Blackhearth Games is the workshop where Court Wizard &mdash; and whatever comes next &mdash; gets made in the open.</p>
-        <p class="chip-row">
-          <a class="chip chip--small" href="#games" data-cmd="games"><span class="chip__arrow" aria-hidden="true">&rsaquo;</span><span class="chip__label">the games</span><span class="chip__cmd" aria-hidden="true">games</span></a>
-          <a class="chip chip--small" href="#ethos" data-cmd="ethos"><span class="chip__arrow" aria-hidden="true">&rsaquo;</span><span class="chip__label">the ethos</span><span class="chip__cmd" aria-hidden="true">ethos</span></a>
-          <a class="chip chip--small" href="#contact" data-cmd="contact"><span class="chip__arrow" aria-hidden="true">&rsaquo;</span><span class="chip__label">say hello</span><span class="chip__cmd" aria-hidden="true">contact</span></a>
-        </p>
       </section>
 
       <section id="games" class="pane" data-pane="games" aria-label="Games">
@@ -173,7 +168,9 @@
         <button type="button" class="chip" data-cmd="games"><span class="chip__arrow" aria-hidden="true">&rsaquo;</span><span class="chip__label">games</span></button>
         <button type="button" class="chip" data-cmd="ethos"><span class="chip__arrow" aria-hidden="true">&rsaquo;</span><span class="chip__label">ethos</span></button>
         <button type="button" class="chip" data-cmd="contact"><span class="chip__arrow" aria-hidden="true">&rsaquo;</span><span class="chip__label">contact</span></button>
-        <button type="button" class="chip chip--icon" data-cmd="scheme" aria-label="toggle light/dark"><span class="chip__arrow" aria-hidden="true">&rsaquo;</span><span class="chip__label" data-scheme-icon>&#9790;</span></button>
+        <button type="button" class="chip" data-cmd="help"><span class="chip__arrow" aria-hidden="true">&rsaquo;</span><span class="chip__label">help</span></button>
+        <button type="button" class="chip" data-cmd="credits"><span class="chip__arrow" aria-hidden="true">&rsaquo;</span><span class="chip__label">credits</span></button>
+        <button type="button" class="chip chip--icon" data-cmd="scheme" aria-label="toggle light/dark"><span class="chip__arrow" aria-hidden="true">&rsaquo;</span><span class="chip__label" data-scheme-icon aria-hidden="true"></span></button>
       </nav>
 
       <!-- ====== STATIC FOOTER (no-JS only) ====== -->
@@ -198,13 +195,13 @@
         <span><kbd>esc</kbd> cancel</span>
       </div>
       <div class="legend legend--mobile">
-        <span>tap a chip above to navigate &middot; <kbd>&#9790;</kbd> toggles light/dark</span>
+        <span>tap a chip above to navigate &middot; the &#9788;/&#9790; chip toggles light/dark</span>
       </div>
       <div class="legend__status">shell &middot; interactive</div>
     </footer>
 
   </div>
 
-  <script src="js/main.js?v=53"></script>
+  <script src="js/main.js?v=63"></script>
 </body>
 </html>

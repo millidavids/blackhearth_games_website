@@ -40,6 +40,11 @@
   // value so localStorage tampering doesn't survive a reload.
   var USERNAME_RE = /^[a-zA-Z0-9_-]{1,24}$/;
   var HISTORY_LIMIT = 500;
+  // Matches the CSS chip-nav breakpoint (see styles.css). When this fires,
+  // the typed prompt is replaced by the chip nav row and the help screen
+  // filters out commands the user can't invoke (no keyboard).
+  var MOBILE_MQ = matchMedia('(max-width: 768px), ((hover: none) and (pointer: coarse) and (max-width: 1024px))');
+  function isMobile() { return MOBILE_MQ.matches; }
   if (state.user === 'root' || !USERNAME_RE.test(state.user)) state.user = 'guest';
 
   // ------------------------------------------------------------------
@@ -81,10 +86,9 @@
       document.documentElement.removeAttribute('data-scheme');
     }
     updateStatusLine();
-    // Flip the mobile scheme-toggle chip's icon to match the current state.
-    // ☼ when in light (tap to go dark); ☾ when in dark (tap to go light).
-    var schemeIcon = document.querySelector('[data-scheme-icon]');
-    if (schemeIcon) schemeIcon.textContent = state.scheme === 'light' ? '☼' : '☾';
+    // Icon is rendered by CSS (::before keyed off :root[data-scheme]), so
+    // it stays in sync at first paint and on every toggle without a JS
+    // textContent flip.
   }
   function updateStatusLine() {
     if (!statusLineEl) return;
@@ -443,28 +447,46 @@
   // ------------------------------------------------------------------
   // Commands
   // ------------------------------------------------------------------
+  // `mobileVisible: true` = reachable via the mobile chip nav AND listed in
+  // the mobile help screen. Commands without it require typing and are
+  // hidden on mobile (no keyboard means no way to invoke them).
   var COMMANDS = {
-    about:   { aliases: ['whoami', 'bio', 'studio'], run: cmdPane('about') },
-    games:   { aliases: ['ls', 'library'], run: cmdPane('games') },
-    ethos:   { aliases: ['creed', 'philosophy', 'manifesto'], run: cmdPane('ethos') },
-    contact: { aliases: ['email', 'hello', 'hi'], run: cmdPane('contact') },
-    launch:  { aliases: ['play', 'open'], run: cmdLaunch, takesArg: true, targets: ['court-wizard'] },
+    about:   { aliases: ['whoami', 'bio', 'studio'], run: cmdPane('about'), mobileVisible: true },
+    games:   { aliases: ['ls', 'library'], run: cmdPane('games'), mobileVisible: true },
+    ethos:   { aliases: ['creed', 'philosophy', 'manifesto'], run: cmdPane('ethos'), mobileVisible: true },
+    contact: { aliases: ['email', 'hello', 'hi'], run: cmdPane('contact'), mobileVisible: true },
+    open:    { aliases: [], run: cmdOpen, takesArg: true /* targets filled in after OPEN_GAMES is defined */ },
     roll:    { aliases: ['r', 'dice'], run: cmdRoll, takesArg: true, targets: ['1d20'] },
     whois:   { aliases: [], run: cmdWhois, takesArg: true, targets: ['david'] },
     su:      { aliases: [], run: cmdSu, takesArg: true, targets: ['david', 'guest'] },
-    help:    { aliases: ['?', 'h'], run: cmdHelp },
-    scheme:  { aliases: ['mode', 'theme', 'color', 'colour'], run: cmdScheme },
+    help:    { aliases: ['?', 'h'], run: cmdHelp, mobileVisible: true },
+    man:     { aliases: ['info'], run: cmdMan, takesArg: true },
+    scheme:  { aliases: ['mode', 'theme', 'color', 'colour'], run: cmdScheme, mobileVisible: true },
     clear:   { aliases: ['cls'], run: cmdClear },
-    credits: { aliases: [], run: cmdCredits },
+    credits: { aliases: [], run: cmdCredits, mobileVisible: true },
     reboot:  { aliases: ['restart'], run: cmdReboot },
     exit:    { aliases: ['quit', 'q'], run: cmdExit },
   };
 
-  var LAUNCH_TARGETS = {
-    'court-wizard': { url: 'https://courtwizard.blackhearthgames.com', label: 'court wizard' },
-    'courtwizard':  { url: 'https://courtwizard.blackhearthgames.com', label: 'court wizard' },
-    'cw':           { url: 'https://courtwizard.blackhearthgames.com', label: 'court wizard' },
-  };
+  // One canonical record per game (id + label + url + alias list). The flat
+  // OPEN_TARGETS map is derived from this so lookup is O(1) and the picker
+  // doesn't have to dedup by URL anymore.
+  var OPEN_GAMES = [
+    {
+      id: 'court-wizard',
+      label: 'court wizard',
+      url: 'https://courtwizard.blackhearthgames.com',
+      aliases: ['courtwizard', 'cw'],
+    },
+  ];
+  var OPEN_TARGETS = Object.create(null);
+  OPEN_GAMES.forEach(function (g) {
+    OPEN_TARGETS[g.id] = g;
+    g.aliases.forEach(function (a) { OPEN_TARGETS[a] = g; });
+  });
+  // Tab-complete targets are the canonical ids only (aliases still resolve
+  // at runtime via OPEN_TARGETS, just not as autosuggested defaults).
+  COMMANDS.open.targets = OPEN_GAMES.map(function (g) { return g.id; });
 
   // ----- dice roller -----
   // Parses NdM[th|tlK][±K] notation. Examples:
@@ -480,9 +502,16 @@
     // Join args without spaces so "roll 1d20 +2" and "roll 1d20+2" both parse.
     var expr = (args || []).join('').toLowerCase();
     if (!expr) {
+      var rollExamples = ['roll 1d20', 'roll 3d6+2', 'roll 8d20th6', 'roll 4d6tl3'];
+      var rollHtml = rollExamples.map(function (ex) {
+        return '<button type="button" class="runnable" data-cmd="' + escapeHtml(ex) +
+          '" aria-label="run ' + escapeHtml(ex) + '">' + escapeHtml(ex) + '</button>';
+      }).join(' ');
       appendBuffer(makeSystem(
-        '<pre>usage: <code>roll &lt;dice&gt;</code>\n' +
-        '  examples:  <code>roll 1d20</code>  <code>roll 3d6+2</code>  <code>roll 8d20th6</code>  <code>roll 4d6tl3</code></pre>'
+        '<div class="cmd-usage">' +
+          '<p>usage: <code>roll &lt;dice&gt;</code></p>' +
+          '<p class="cmd-usage__row">examples: ' + rollHtml + '</p>' +
+        '</div>'
       ));
       return;
     }
@@ -548,23 +577,36 @@
     appendBuffer(makeSystem(html));
   }
 
-  function cmdLaunch(args) {
+  function cmdOpen(args) {
     var raw = (args[0] || '').toLowerCase();
     if (!raw) {
+      // Build a clickable list of game targets so the user can tap one
+      // instead of typing. Only canonical targets are listed (aliases are
+      // shown in dim text).
+      var rows = OPEN_GAMES.map(function (g) {
+        var aliasHint = g.aliases && g.aliases.length
+          ? ' <span class="dim">(aliases: ' + escapeHtml(g.aliases.join(', ')) + ')</span>'
+          : '';
+        return '<p class="cmd-usage__row">' +
+          '<button type="button" class="runnable" data-cmd="open ' + escapeHtml(g.id) + '" ' +
+            'aria-label="open ' + escapeHtml(g.label) + '">→ ' + escapeHtml(g.id) + '</button>' +
+          aliasHint +
+          '</p>';
+      }).join('');
       appendBuffer(makeSystem(
-        '<pre>what would you like to launch?\n  → court-wizard   <span class="dim">(aliases: courtwizard, cw)</span></pre>'
+        '<div class="cmd-usage"><p>which game site?</p>' + rows + '</div>'
       ));
       return;
     }
-    var target = LAUNCH_TARGETS[raw];
+    var target = OPEN_TARGETS[raw];
     if (!target) {
       appendBuffer(makeSystem(
-        '<pre><span class="err">no such game: ' + escapeHtml(raw) + '</span>. try <code>launch</code> to list available games.</pre>'
+        '<pre><span class="err">no such game: ' + escapeHtml(raw) + '</span>. try <code>open</code> to list available game sites.</pre>'
       ));
       return;
     }
     appendBuffer(makeSystem(
-      '<pre>→ launching <span class="accent">' + escapeHtml(target.label) + '</span> in a new tab&hellip;</pre>'
+      '<pre>→ opening <span class="accent">' + escapeHtml(target.label) + '</span>&apos;s website in a new tab&hellip;</pre>'
     ));
     window.open(target.url, '_blank', 'noopener,noreferrer');
   }
@@ -625,30 +667,278 @@
     appendBuffer(makeSystem('<pre>whois who? try <code>whois david</code>.</pre>'));
   }
 
+  // Each row's `key` is the command this row documents — used to filter by
+  // COMMANDS[key].mobileVisible. `label` may include argument hint (e.g.
+  // `open <game>`) for display; lookups always use `key`.
+  var HELP_CONTENT = [
+    { key: 'about',   label: 'about',          desc: 'the studio',                 hint: 'whoami, bio, studio' },
+    { key: 'games',   label: 'games',          desc: "what's being developed",     hint: 'ls, library' },
+    { key: 'ethos',   label: 'ethos',          desc: 'studio principles',          hint: 'creed, philosophy, manifesto' },
+    { key: 'contact', label: 'contact',        desc: 'say hello',                  hint: 'email, hello, hi' },
+    { key: 'open',    label: 'open <game>',    desc: "visit a game's website",     hint: 'e.g., open court-wizard' },
+    { key: 'roll',    label: 'roll <dice>',    desc: 'roll dice (NdM, ±K, th/tl K)', hint: 'e.g., 1d20, 3d6+2, 8d20th6' },
+    { key: 'whois',   label: 'whois david',    desc: 'the founder' },
+  ];
+  var HELP_UTILITY = [
+    { key: 'su',      label: 'su <name>',      desc: 'switch the prompt name',     hint: 'e.g., su david' },
+    { key: 'scheme',  label: 'scheme',         desc: 'toggle dark / light',        hint: 'mode, theme' },
+    { key: 'clear',   label: 'clear',          desc: 'clear the buffer',           hint: 'cls' },
+    { key: 'credits', label: 'credits',        desc: 'who built this terminal' },
+    { key: 'reboot',  label: 'reboot',         desc: 'replay the boot sequence',   hint: 'restart' },
+    { key: 'help',    label: 'help',           desc: 'this screen',                hint: '?, h' },
+    { key: 'man',     label: 'man <cmd>',      desc: 'manual entry for a command', hint: 'e.g., man roll' },
+  ];
+
+  function renderHelpRow(row) {
+    // `hint` covers both alias lists and example notations. Rendered as a
+    // separate grid cell so it aligns vertically across rows on desktop;
+    // hidden on narrow viewports via CSS (.help__aliases { display: none }).
+    // An empty placeholder is emitted when a row has no hint so the grid's
+    // auto-flow doesn't pull the next row's cmd into this row's column 3.
+    var hint;
+    if (row.hint) {
+      var prefix = row.hint.indexOf('e.g.') === 0 ? '' : 'aliases: ';
+      hint = '<span class="help__aliases dim">' + escapeHtml(prefix + row.hint) + '</span>';
+    } else {
+      hint = '<span class="help__aliases" aria-hidden="true"></span>';
+    }
+    // The cmd cell is a real <button data-cmd="..."> so it's clickable AND
+    // keyboard-focusable for users who can't type — the document-level chip
+    // handler picks up [data-cmd] and runs it. Argument placeholders are
+    // stripped from the data-cmd so e.g. `roll <dice>` invokes `roll`
+    // (which prints usage). The aria-label keeps the visible label so the
+    // announced action matches what the user sees, and adds "— show usage"
+    // for arg-bearing rows since `roll` (no args) prints a usage screen
+    // rather than performing a roll.
+    var hasArg = /<[^>]+>/.test(row.label);
+    var runnable = row.label.replace(/\s+<[^>]+>/g, '').replace(/<[^>]+>\s*/g, ' ').trim() || row.key;
+    var aria = hasArg ? row.label + ' — show usage' : 'run ' + row.label;
+    return '<div class="help__row">' +
+      '<button type="button" class="help__cmd" data-cmd="' + escapeHtml(runnable) +
+        '" aria-label="' + escapeHtml(aria) + '">' +
+        escapeHtml(row.label) +
+      '</button>' +
+      '<span class="help__desc">' + escapeHtml(row.desc) + '</span>' +
+      hint +
+      '</div>';
+  }
+
   function cmdHelp() {
-    var html =
-      '<pre><span class="accent">commands</span>\n\n' +
-      '  <span class="dim">content</span>\n' +
-      '    about         the studio                        <span class="dim">(aliases: whoami, bio, studio)</span>\n' +
-      "    games         what's being developed            <span class=\"dim\">(aliases: ls, library)</span>\n" +
-      '    ethos         studio principles                 <span class="dim">(aliases: creed, philosophy, manifesto)</span>\n' +
-      '    contact       say hello                         <span class="dim">(aliases: email, hello, hi)</span>\n' +
-      '    launch &lt;game&gt; open a game in a new tab          <span class="dim">(e.g., launch court-wizard)</span>\n' +
-      '    roll &lt;dice&gt;   roll dice (NdM, ±K, th/tl K)       <span class="dim">(e.g., 1d20, 3d6+2, 8d20th6)</span>\n' +
-      '    whois david   the founder\n\n' +
-      '  <span class="dim">utility</span>\n' +
-      '    su &lt;name&gt;     switch the prompt name            <span class="dim">(e.g., su david)</span>\n' +
-      '    scheme        toggle dark / light               <span class="dim">(aliases: mode, theme)</span>\n' +
-      '    clear         clear the buffer                  <span class="dim">(alias: cls)</span>\n' +
-      '    credits       who built this terminal\n' +
-      '    reboot        replay the boot sequence          <span class="dim">(alias: restart)</span>\n' +
-      '    help          this screen                       <span class="dim">(aliases: ?, h)</span>\n\n' +
-      '  <span class="dim">keys</span>\n' +
-      '    enter   run                                           tab     complete\n' +
-      '    →       accept suggest                                ↑ / ↓   history\n' +
-      '    ⌘K      clear                                         ⌘;      scheme\n' +
-      '    esc     cancel current input\n\n' +
-      '<span class="dim">aliases exist. type the obvious thing — it probably works.</span></pre>';
+    var mobile = isMobile();
+    function visible(row) {
+      var c = COMMANDS[row.key];
+      return !mobile || (c && c.mobileVisible);
+    }
+    var content = HELP_CONTENT.filter(visible);
+    var utility = HELP_UTILITY.filter(visible);
+
+    var html = '<section class="help" aria-label="command reference">';
+    html += '<p class="help__title accent">commands</p>';
+    if (content.length) {
+      html += '<p class="help__group dim">content</p>';
+      content.forEach(function (r) { html += renderHelpRow(r); });
+    }
+    if (utility.length) {
+      html += '<p class="help__group dim">utility</p>';
+      utility.forEach(function (r) { html += renderHelpRow(r); });
+    }
+    if (mobile) {
+      html += '<p class="help__footer dim">tap a chip below to navigate · <kbd>☾</kbd>/<kbd>☼</kbd> toggles scheme.</p>';
+    } else {
+      html += '<p class="help__group dim">keys</p>';
+      html += '<pre class="help__keys">' +
+        '    enter   run                                           tab     complete\n' +
+        '    →       accept suggest                                ↑ / ↓   history\n' +
+        '    ⌘K      clear                                         ⌘;      scheme\n' +
+        '    esc     cancel current input</pre>';
+      html += '<p class="help__footer dim">aliases exist. type the obvious thing — it probably works.</p>';
+    }
+    html += '</section>';
+    appendBuffer(makeSystem(html));
+  }
+
+  // ----- man pages -----
+  // Mini reference docs for each command. `man <cmd>` prints the entry in
+  // a Linux-man-page-like layout. Aliases of the command (resolved via
+  // resolveCmd) are accepted as the lookup key, mirroring `man ls` →
+  // games behavior in real shells.
+  var MAN_PAGES = {
+    about: {
+      name: 'about — studio identity card',
+      synopsis: 'about',
+      description: 'Shows a short bio of the studio: who runs it, when it started, what game it\'s working on, and how it operates.',
+      examples: ['about'],
+    },
+    games: {
+      name: 'games — what is being developed',
+      synopsis: 'games',
+      description: "Lists the games this studio has made. Right now: Court Wizard.",
+      examples: ['games'],
+    },
+    ethos: {
+      name: 'ethos — studio principles',
+      synopsis: 'ethos',
+      description: 'A short statement of what this studio cares about and how it operates.',
+      examples: ['ethos'],
+    },
+    contact: {
+      name: 'contact — say hello',
+      synopsis: 'contact',
+      description: 'Shows the studio\'s email and a button that opens your email app with a new message started. We read everything; we usually reply.',
+      examples: ['contact'],
+    },
+    open: {
+      name: "open — visit a game's website",
+      synopsis: 'open <game>',
+      description: "Opens the game's website in a new browser tab. This does not start the game itself — it just takes you to the game's webpage, where you can read more about it, download it, or play it.",
+      arguments: [
+        ['<game>', 'court-wizard (aliases: courtwizard, cw)'],
+      ],
+      examples: ['open court-wizard', 'open cw'],
+    },
+    roll: {
+      name: 'roll — roll dice',
+      synopsis: 'roll <NdM>[th|tlK][±K]',
+      description: 'Rolls dice. You can roll any number of dice with any number of sides, add or subtract a bonus to the total, and optionally keep only the highest or lowest few rolls.',
+      arguments: [
+        ['N',         'how many dice to roll (defaults to 1)'],
+        ['M',         'how many sides each die has'],
+        ['thK / tlK', 'keep only the K highest (th) or K lowest (tl) rolls'],
+        ['±K',        'a number added to or subtracted from the total'],
+      ],
+      examples: ['roll 1d20', 'roll d20', 'roll 3d6+2', 'roll 2d8-1', 'roll 8d20th6', 'roll 4d6tl3+1'],
+    },
+    whois: {
+      name: 'whois — look up a person',
+      synopsis: 'whois <subject>',
+      description: "Prints a short bio of the person you name. Right now, only `whois david` (the founder) is set up.",
+      arguments: [
+        ['<subject>', 'david (the founder)'],
+      ],
+      examples: ['whois david'],
+    },
+    su: {
+      name: 'su — switch the prompt username',
+      synopsis: 'su <name>',
+      description: 'Changes the name shown before the @blackhearth in the prompt (e.g. guest@blackhearth → david@blackhearth). The name sticks across page reloads. `root` is not allowed.',
+      arguments: [
+        ['<name>', 'a short name (letters, digits, dashes, or underscores; up to 24 characters)'],
+      ],
+      examples: ['su david', 'su guest'],
+    },
+    help: {
+      name: 'help — command reference',
+      synopsis: 'help',
+      description: 'Lists every available command with a one-line description.',
+      examples: ['help'],
+    },
+    man: {
+      name: 'man — show the manual for a command',
+      synopsis: 'man <command>',
+      description: 'Shows the manual page for a command. Aliases also work — for example, `man ls` will show the manual for `games`.',
+      arguments: [
+        ['<command>', 'any command name or alias'],
+      ],
+      examples: ['man roll', 'man open', 'man scheme'],
+    },
+    scheme: {
+      name: 'scheme — toggle dark / light mode',
+      synopsis: 'scheme',
+      description: 'Switches between dark and light mode. Your choice sticks across page reloads.',
+      examples: ['scheme'],
+    },
+    clear: {
+      name: 'clear — empty the screen',
+      synopsis: 'clear',
+      description: 'Removes all printed output, leaving a fresh prompt. Your command history is kept. Shortcut: ⌘K (Mac) or Ctrl+K.',
+      // No EXAMPLES — running `clear` from within `man clear` would erase
+      // the page the user is reading.
+    },
+    credits: {
+      name: 'credits — who built this and what they used',
+      synopsis: 'credits',
+      description: 'Shows who built this website and which fonts and tools were used along the way.',
+      examples: ['credits'],
+    },
+    reboot: {
+      name: 'reboot — start over from the boot screen',
+      synopsis: 'reboot',
+      description: 'Clears the screen and replays the boot-up animation, then shows the help screen again — like a fresh visit.',
+      // No EXAMPLES — tapping `reboot` from inside `man reboot` would wipe
+      // the page the user is reading and replay the boot animation.
+    },
+    exit: {
+      name: 'exit — say goodbye',
+      synopsis: 'exit',
+      description: 'Disables the prompt and prints a farewell. Press any key or click anywhere to bring it back. (The page can\'t actually close itself — browsers don\'t allow that.)',
+      // No EXAMPLES — tapping `exit` from inside `man exit` would disable
+      // the prompt the user might want to use next.
+    },
+  };
+
+  // Populate man's tab-completion targets now that both tables exist.
+  COMMANDS.man.targets = Object.keys(MAN_PAGES);
+
+  function cmdMan(args) {
+    var subject = (args[0] || '').toLowerCase();
+    if (!subject) {
+      var pageLinks = Object.keys(MAN_PAGES).sort().map(function (p) {
+        return '<button type="button" class="runnable" data-cmd="man ' + escapeHtml(p) +
+          '" aria-label="show manual for ' + escapeHtml(p) + '">' + escapeHtml(p) + '</button>';
+      }).join(', ');
+      appendBuffer(makeSystem(
+        '<div class="cmd-usage">' +
+          '<p>usage: <code>man &lt;command&gt;</code></p>' +
+          '<p class="cmd-usage__row">available: ' + pageLinks + '</p>' +
+        '</div>'
+      ));
+      return;
+    }
+    // Resolve aliases — e.g. `man ls` → games's manual entry.
+    // hasOwnProperty guard prevents `man __proto__` / `man constructor` /
+    // `man toString` from leaking inherited Object.prototype keys through
+    // the lookup and producing nonsense or a TypeError downstream.
+    var key = resolveCmd(subject) || subject;
+    var page = Object.prototype.hasOwnProperty.call(MAN_PAGES, key) ? MAN_PAGES[key] : null;
+    if (!page) {
+      appendBuffer(makeSystem(
+        '<pre><span class="err">no manual entry for ' + escapeHtml(subject) + '</span>. try <code>man</code> with no argument to list available pages.</pre>'
+      ));
+      return;
+    }
+    var html = '<section class="man" aria-label="manual: ' + escapeHtml(key) + '">';
+    html += '<p class="man__section accent">NAME</p>';
+    html += '<p class="man__body">' + escapeHtml(page.name) + '</p>';
+    html += '<p class="man__section accent">SYNOPSIS</p>';
+    html += '<p class="man__body"><code>' + escapeHtml(page.synopsis) + '</code></p>';
+    html += '<p class="man__section accent">DESCRIPTION</p>';
+    html += '<p class="man__body">' + escapeHtml(page.description) + '</p>';
+    if (page.arguments && page.arguments.length) {
+      html += '<p class="man__section accent">ARGUMENTS</p>';
+      page.arguments.forEach(function (pair) {
+        html += '<div class="man__arg">' +
+          '<span class="man__arg-name"><code>' + escapeHtml(pair[0]) + '</code></span>' +
+          '<span class="man__arg-desc">' + escapeHtml(pair[1]) + '</span>' +
+          '</div>';
+      });
+    }
+    // ALIASES section is sourced from the COMMANDS table — single source
+    // of truth, so adding/removing an alias only requires one edit.
+    var cmdAliases = (COMMANDS[key] && COMMANDS[key].aliases) || [];
+    if (cmdAliases.length) {
+      html += '<p class="man__section accent">ALIASES</p>';
+      html += '<p class="man__body">' + escapeHtml(cmdAliases.join(', ')) + '</p>';
+    }
+    if (page.examples && page.examples.length) {
+      html += '<p class="man__section accent">EXAMPLES</p>';
+      page.examples.forEach(function (ex) {
+        // Clickable so non-typing users can run the example directly.
+        html += '<button type="button" class="man__example" data-cmd="' +
+          escapeHtml(ex) + '" aria-label="run ' + escapeHtml(ex) + '">' +
+          escapeHtml(ex) + '</button>';
+      });
+    }
+    html += '</section>';
     appendBuffer(makeSystem(html));
   }
 
@@ -750,6 +1040,7 @@
   var LEGACY_HASHES = Object.create(null);
   LEGACY_HASHES.philosophy = 'ethos';
   LEGACY_HASHES.creed = 'ethos';
+  LEGACY_HASHES.launch = 'open';
   LEGACY_HASHES.main = '';
   LEGACY_HASHES.hero = '';
   LEGACY_HASHES.top = '';
@@ -767,6 +1058,16 @@
     return { cmd: parts[0], args: parts.slice(1) };
   }
 
+  // Given the buffer child that was the form's previousElementSibling BEFORE
+  // a command ran, return the first element that command appended (or null
+  // if nothing was added). Used by execute() to find a scroll anchor when
+  // there's no echo to anchor on.
+  function firstAppendedAfter(priorLast) {
+    if (!bufferEl || !formEl) return null;
+    var next = priorLast ? priorLast.nextElementSibling : bufferEl.firstElementChild;
+    return (next && next !== formEl) ? next : null;
+  }
+
   function execute(raw, opts) {
     opts = opts || {};
     var parsed = parse(raw);
@@ -782,10 +1083,18 @@
     // scrollNodeToTop with its own auto-pin-to-bottom behavior. Also queue
     // the reveal to wait for the buffer's actual `scrollend` — the prompt
     // visibly returns to the top first, then the result reveals.
-    if (echoNode) {
-      afterEchoScroll = true;
-      waitForScrollSettle = true;
-    }
+    //
+    // Set unconditionally: even echo-less invocations (auto-help on boot,
+    // popstate routing) should scroll the new output to the top so the
+    // boot lines / previous content visibly slide off rather than the new
+    // content typing out below them.
+    afterEchoScroll = true;
+    waitForScrollSettle = true;
+
+    // Remember what was the last buffer child before the command runs so we
+    // can identify what got appended (used as the scroll anchor when there's
+    // no echo to anchor on).
+    var priorLast = (bufferEl && formEl) ? formEl.previousElementSibling : null;
 
     var key = resolveCmd(parsed.cmd);
     if (!key) {
@@ -793,8 +1102,9 @@
         '<pre><span class="err">command not found: ' + escapeHtml(parsed.cmd) + '</span>. try <code>help</code>.</pre>'
       ));
       // Even unknown commands deserve the scroll-to-top treatment.
-      if (echoNode) requestAnimationFrame(function () {
-        if (echoNode.isConnected) scrollNodeToTop(echoNode);
+      var notFoundAnchor = echoNode || firstAppendedAfter(priorLast);
+      if (notFoundAnchor) requestAnimationFrame(function () {
+        if (notFoundAnchor.isConnected) scrollNodeToTop(notFoundAnchor);
       });
       waitForScrollSettle = false;
       return;
@@ -807,12 +1117,12 @@
     }
     // Reset the wait flag if no typewriter consumed it (e.g. cmdClear).
     waitForScrollSettle = false;
-    // Now that the output container is in the DOM (so scrollHeight reflects
-    // the new content), animate the buffer so the just-issued echo sits at
-    // the top of the visible area. The output types out below it. Skip the
-    // scroll if the command (cmdClear / cmdReboot) already detached the echo.
-    if (echoNode) requestAnimationFrame(function () {
-      if (echoNode.isConnected) scrollNodeToTop(echoNode);
+    // Animate the buffer so the new output's first element sits at the top
+    // of the visible area. Falls back to the first element appended during
+    // this command if no echo exists (auto-help on boot / popstate routing).
+    var anchor = echoNode || firstAppendedAfter(priorLast);
+    if (anchor) requestAnimationFrame(function () {
+      if (anchor.isConnected) scrollNodeToTop(anchor);
     });
 
     if (opts.pushHistory && HISTORY_COMMANDS.indexOf(key) >= 0) {
@@ -985,7 +1295,7 @@
   // Pre-sorted suggestion pool: canonical command names + multi-char aliases.
   // Each entry carries a rank — canonical names rank 0, aliases rank 1 — so a
   // canonical match always beats an alias of the same prefix (e.g. typing
-  // `l` suggests `launch` ahead of `ls`). Ties break on length then alpha.
+  // `c` suggests `clear` ahead of `cls`). Ties break on length then alpha.
   var SUGGESTIONS = (function () {
     var pool = [];
     Object.keys(COMMANDS).forEach(function (k) {
@@ -1081,17 +1391,22 @@
     var caretChar = '';
     var afterRest = after;
     var ghostRest = ghost;
+    var caretIsGhost = false;
     if (after.length > 0) {
       caretChar = after.charAt(0);
       afterRest = after.slice(1);
     } else if (ghost.length > 0) {
       caretChar = ghost.charAt(0);
       ghostRest = ghost.slice(1);
+      caretIsGhost = true;
     }
 
     fieldEl.classList.toggle('has-input', value.length > 0);
     beforeEl.textContent = before;
     caretEl.textContent = caretChar;
+    // Tell the CSS whether the caret's char came from typed input or from
+    // the ghost suggestion — ghost chars render dim to match the rest.
+    caretEl.classList.toggle('is-ghost', caretIsGhost);
     afterEl.textContent = afterRest;
     ghostEl.textContent = ghostRest;
   }

@@ -29,7 +29,7 @@ The whole site is a fake terminal window. Visitors type commands at a prompt; ou
 | `games` | `ls`, `library` | The studio's catalogue (currently Court Wizard) |
 | `ethos` | `creed`, `philosophy`, `manifesto` | The studio's working principles |
 | `contact` | `email`, `hello`, `hi` | One-tap mailto |
-| `launch <game>` | `play`, `open` | Open a game in a new tab (e.g., `launch court-wizard`) |
+| `open <game>` | — | Visit a game's website in a new tab (e.g., `open court-wizard`) — this navigates to the standalone game site; it does not run the game itself |
 | `roll <dice>` | `r`, `dice` | Dice roller — see [Dice notation](#dice-notation) |
 | `whois david` | — | Founder info |
 | `su <name>` | — | Switch the prompt's username (persists; `root` rejected) |
@@ -67,7 +67,9 @@ All hotkeys are modifier-based so they fire regardless of whether the prompt inp
 
 ### Mobile
 
-On small touch screens the typed prompt is replaced by a chip nav row (`about`, `games`, `ethos`, `contact`, and a `☾`/`☼` scheme toggle). The chip taps dispatch the corresponding commands through the same handler the prompt uses.
+On small touch screens the typed prompt is replaced by a chip nav row (`about`, `games`, `ethos`, `contact`, `help`, `credits`, and a `☾`/`☼` scheme toggle). The chip taps dispatch the corresponding commands through the same handler the prompt uses. Help output filters its rows by a `mobileVisible` flag on each command entry, so typing-required commands (`open`, `roll`, `whois`, `su`, `man`, `clear`, `reboot`, `exit`) don't appear in the mobile help screen.
+
+Inside the help and `man` output, command names are real `<button data-cmd="…">` elements that run the command on click — so users who can't type still have a way to invoke every chip-reachable command.
 
 ### Autosuggestion
 

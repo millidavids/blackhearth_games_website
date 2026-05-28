@@ -463,13 +463,12 @@ html.has-js body {
 .chip:active { transform: translateY(1px); }
 .chip__arrow { color: var(--fg-dim); }
 .chip__label { color: inherit; }
-.chip__cmd {
-  color: var(--fg-mute);
-  font-size: 0.72rem;
-  padding-left: 0.5em;
-  border-left: 1px solid var(--rule);
-  margin-left: 0.25em;
-}
+/* Scheme-toggle icon renders via a pseudo-element keyed off [data-scheme]
+   on <html>. The inline head-script sets that attribute before first
+   paint, so the icon is correct from the very first frame — no FOUC. The
+   icon shows the scheme you'd switch TO: sun in dark mode, moon in light. */
+[data-scheme-icon]::before { content: '\2600'; }                 /* ☼ — default (dark mode) */
+:root[data-scheme="light"] [data-scheme-icon]::before { content: '\263E'; } /* ☾ — light mode */
 .chip--small {
   font-size: 0.72rem;
   padding: 0.3rem 0.6rem;
@@ -551,6 +550,158 @@ html.has-js body {
   text-underline-offset: 3px;
 }
 .system .ok { color: var(--fg-bright); }
+
+/* ==========================================================================
+   HELP — semantic, responsive replacement for the old <pre> column table.
+   Desktop renders as a 2-col grid (cmd | desc + aliases). Aliases hide and
+   the keys footer disappears on narrow viewports — see mobile media query.
+   ========================================================================== */
+/* .help is the grid container so column tracks are shared across all rows
+   (cmd | description | aliases). `.help__row` uses display:contents so its
+   children land in the outer grid; .help__group/title/footer/keys span the
+   full row via `grid-column: 1 / -1`. */
+.help {
+  font-family: var(--font-terminal);
+  /* Match the terminal-font size used by .system pre / .help__keys so the
+     grid rows and the keys block render at the same size. */
+  font-size: 0.85rem;
+  padding: 0.2rem 0;
+  display: grid;
+  grid-template-columns: minmax(8ch, 14ch) max-content 1fr;
+  column-gap: 1.5rem;
+  row-gap: 0.05rem;
+  align-items: baseline;
+}
+.help__title,
+.help__group,
+.help__keys,
+.help__footer {
+  grid-column: 1 / -1;
+}
+.help__title { font-size: 0.95rem; margin-bottom: 0.5rem; }
+.help__group {
+  margin: 0.6rem 0 0.2rem;
+  font-size: 0.85rem;
+  letter-spacing: 0.02em;
+}
+.help__row { display: contents; }
+/* .help__cmd is a real <button> so keyboard / AT users can run a command
+   without typing. Style is text-like — only hover/focus surfaces the
+   affordance. */
+.help__cmd {
+  background: none;
+  border: 0;
+  margin: 0;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  color: var(--fg);
+  white-space: nowrap;
+  padding: 0 0 0 1rem;
+  border-radius: 2px;
+}
+.help__cmd:hover,
+.help__cmd:focus-visible {
+  color: var(--fg-bright);
+  text-decoration: underline;
+  text-decoration-color: var(--fg-dim);
+  text-underline-offset: 3px;
+}
+.help__desc { color: var(--fg); }
+.help__aliases {
+  font-size: 0.92em;
+  white-space: nowrap;
+  justify-self: start;
+}
+.help__keys {
+  margin: 0.4rem 0 0 1rem;
+  color: var(--fg-dim);
+  font-size: 0.92em;
+  white-space: pre;
+}
+.help__footer { margin-top: 0.7rem; }
+.help kbd {
+  display: inline-block;
+  padding: 0 0.3em;
+  border: 1px solid var(--rule-strong);
+  border-radius: 3px;
+  font-family: inherit;
+  color: var(--fg);
+}
+
+/* ==========================================================================
+   MAN — manual-page layout for `man <cmd>`. Section headers stack above
+   indented body text, Linux-man-page style. Stacks naturally on mobile.
+   ========================================================================== */
+.man { font-family: var(--font-terminal); padding: 0.2rem 0; }
+.man__section {
+  margin-top: 0.8rem;
+  font-size: 0.88rem;
+  letter-spacing: 0.04em;
+}
+.man__section:first-of-type { margin-top: 0; }
+.man__body { padding-left: 1.5rem; color: var(--fg); }
+.man__arg {
+  display: grid;
+  grid-template-columns: minmax(9ch, 14ch) 1fr;
+  gap: 0.4rem 1rem;
+  padding: 0.05rem 0 0.05rem 1.5rem;
+  align-items: baseline;
+}
+.man__arg-name { color: var(--fg-bright); white-space: nowrap; }
+.man__arg-desc { color: var(--fg); }
+.man code { color: var(--fg-bright); }
+
+/* Usage / picker blocks (cmdRoll, cmdOpen, cmdMan no-arg branches). Uses
+   block layout so inline-block .runnable buttons inside don't get baseline-
+   shifted the way they would inside a <pre>. */
+.cmd-usage { padding: 0.2rem 0; color: var(--fg); }
+.cmd-usage p { margin: 0; padding: 0.05rem 0 0.05rem 1.5rem; }
+.cmd-usage p:first-child { padding-left: 0; }
+.cmd-usage code { color: var(--fg-bright); }
+.cmd-usage__row .runnable + .runnable { margin-left: 0.4rem; }
+
+/* Inline clickable command snippet — used by usage / list output to make
+   the listed commands keyboard- and pointer-runnable for non-typing users. */
+.runnable {
+  display: inline-block;
+  margin: 0;
+  padding: 0;
+  background: none;
+  border: 0;
+  font: inherit;
+  color: var(--fg-bright);
+  cursor: pointer;
+  text-align: left;
+  border-radius: 2px;
+}
+.runnable:hover,
+.runnable:focus-visible {
+  text-decoration: underline;
+  text-decoration-color: var(--fg-dim);
+  text-underline-offset: 3px;
+}
+/* Clickable example command — a real <button> so keyboard + AT users can
+   run it the same way they tap a chip. Styled to look like text content. */
+.man__example {
+  display: block;
+  padding: 0.05rem 0 0.05rem 1.5rem;
+  margin: 0;
+  background: none;
+  border: 0;
+  font: inherit;
+  color: var(--fg-bright);
+  text-align: left;
+  cursor: pointer;
+  border-radius: 2px;
+}
+.man__example:hover,
+.man__example:focus-visible {
+  color: var(--fg-bright);
+  text-decoration: underline;
+  text-decoration-color: var(--fg-dim);
+  text-underline-offset: 3px;
+}
 
 /* ==========================================================================
    PANES (cloned content)
@@ -745,13 +896,17 @@ html.has-js body {
 .prompt__field:not(.has-input) .prompt__after,
 .prompt__field:not(.has-input) .prompt__ghost { display: none; }
 
-/* Block cursor — 1ch wide, overlays the char at the cursor position.
+/* Block cursor — 1ch wide, sits at the cursor position.
    - The char is the caret's text content (inline, aligns with siblings naturally).
    - A ::before pseudo draws the violet block, positioned absolutely so it
      extends slightly above and below the text line without disturbing layout.
-   - Two sync'd animations: block opacity blinks; char color flips between
-     bg (inverted, when block is "on") and fg (normal, when block is "off")
-     so the character stays readable through the entire blink cycle. */
+   - Two sync'd animations: block opacity blinks; the char's COLOR flips
+     between transparent (while the block is showing — no character renders
+     on top) and the visible color (while the block is off). `transparent`
+     is used instead of `opacity: 0` because opacity would cascade to the
+     ::before block and hide it too.
+   - The "visible" color comes from a CSS custom property so the ghost
+     variant only has to override --caret-off-color, not the keyframe. */
 .prompt__caret {
   display: inline-block;
   width: 1ch;
@@ -760,7 +915,8 @@ html.has-js body {
   text-align: center;
   white-space: pre;
   z-index: 0;
-  color: var(--fg);
+  --caret-off-color: var(--fg);
+  color: var(--caret-off-color);
   animation: caret-char-blink 1.05s steps(1) infinite;
 }
 .prompt__caret::before {
@@ -779,15 +935,17 @@ html.has-js body {
   50%, 100% { opacity: 0; }
 }
 @keyframes caret-char-blink {
-  /* When the block is opaque, render the char in bg color (inverted).
-     When the block fades to invisible, return char to fg color (normal). */
-  0%, 49% { color: var(--bg); }
-  50%, 100% { color: var(--fg); }
+  0%, 49% { color: transparent; }
+  50%, 100% { color: var(--caret-off-color); }
 }
-/* Blurred state: hollow outlined block, no blink, char in normal fg color */
+/* Ghost-preview char: only the OFF color changes; animation shared. */
+.prompt__caret.is-ghost { --caret-off-color: var(--fg-faint); }
+/* Blurred state: hollow outlined block, no blink. Color follows the same
+   --caret-off-color indirection used by the focused-state animation, so a
+   blurred-but-still-ghost caret stays dim. */
 .prompt__field:not(.is-focused) .prompt__caret {
   animation: none;
-  color: var(--fg);
+  color: var(--caret-off-color);
 }
 .prompt__field:not(.is-focused) .prompt__caret::before {
   animation: none;
@@ -853,7 +1011,6 @@ html.has-js body {
   .identity__tag { font-size: 0.78rem; }
 
   .chip { padding: 0.45rem 0.65rem; font-size: 0.76rem; }
-  .chip__cmd { display: none; }
 
   .kv__row { grid-template-columns: 6rem 1fr; gap: 0.6rem; }
   .ethos__row { grid-template-columns: 1fr; gap: 0.2rem; }
@@ -892,6 +1049,20 @@ html.has-js body {
   .legend__status { font-size: 0.85rem; }
 
   .buffer { padding: 0.4rem 0 0.8rem; }
+
+  /* Help — drop the alias column on phones and narrow the cmd column so
+     the cmd/desc pair fits comfortably. */
+  .help { grid-template-columns: minmax(6ch, 11ch) 1fr; }
+  .help__cmd { padding-left: 0.5rem; }
+  .help__aliases { display: none; }
+  .help__group { margin-left: 0; }
+
+  /* Man — let argument tables stack on tight widths. */
+  .man__arg {
+    grid-template-columns: minmax(7ch, 12ch) 1fr;
+    padding-left: 0.5rem;
+  }
+  .man__body, .man__example { padding-left: 0.5rem; }
 }
 
 /* ==========================================================================
