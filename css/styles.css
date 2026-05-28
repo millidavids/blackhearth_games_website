@@ -1,1076 +1,922 @@
 /* ==========================================================================
-   BLACKHEARTH GAMES — Studio Website
-   Fantasy tavern aesthetic — warm, cozy, where adventures begin
+   BLACKHEARTH GAMES — wizard's grimoire terminal
+   ember-default; phosphor / arcane / parchment alternates
    ========================================================================== */
 
-/* ===== RESET & BASE ===== */
-*,
-*::before,
-*::after {
+/* ===== FONTS ===== */
+@font-face {
+  font-family: 'Press Start 2P';
+  src: url('../fonts/PressStart2P-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Monaspace Krypton';
+  src: url('../fonts/MonaspaceKrypton-Var.woff2') format('woff2-variations');
+  font-weight: 200 800;
+  font-style: oblique 0deg 11deg;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Monaspace Neon';
+  src: url('../fonts/MonaspaceNeon-Var.woff2') format('woff2-variations');
+  font-weight: 200 800;
+  font-style: oblique 0deg 11deg;
+  font-display: swap;
+}
+
+/* ===== RESET ===== */
+*, *::before, *::after {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
+/* ===== TOKENS — arcane (default) ===== */
 :root {
-  /* Depth palette — tavern darkness, warm charcoal & timber */
-  --void: #0a0806;
-  --abyss: #110e0a;
-  --obsidian: #1a1610;
-  --shadow: #241e16;
-  --dusk: #302820;
-  --iron: #3c3228;
+  --bg: #0b0907;
+  --bg-elevated: #14110d;
+  --bg-deep: #07050300;
+  --chrome: #1c1812;
+  --rule: rgba(200, 156, 255, 0.14);
+  --rule-strong: rgba(200, 156, 255, 0.28);
 
-  /* Gold spectrum — candlelight & firelight */
-  --gold: #d4a040;
-  --gold-bright: #f0d080;
-  --gold-dim: #9a7830;
-  --gold-pale: rgba(212, 160, 64, 0.10);
-  --gold-glow: rgba(212, 160, 64, 0.25);
+  /* foreground hue — themed axis */
+  --fg: #c89cff;
+  --fg-bright: #e6d0ff;
+  --fg-dim: rgba(200, 156, 255, 0.62);
+  --fg-faint: rgba(200, 156, 255, 0.22);
+  --fg-mute: rgba(200, 156, 255, 0.40);
+  --fg-glow: rgba(200, 156, 255, 0.35);
 
-  /* Hearth spectrum — the fireplace */
-  --hearth: #b84820;
-  --hearth-bright: #d46030;
-  --hearth-glow: rgba(184, 72, 32, 0.25);
+  /* foreground hue numeric for canvas */
+  --fg-rgb: 200 156 255;
 
-  /* Ember spectrum — sparks from the fire */
-  --ember: #d07028;
-  --ember-dim: #905018;
-  --ember-glow: rgba(208, 112, 40, 0.25);
-
-  /* Text hierarchy — parchment tones */
-  --text-bright: #ede5d6;
-  --text-body: #c8bca8;
-  --text-muted: #8a7e68;
-
-  /* Layout tokens */
+  /* layout */
   --max-w: 1100px;
-  --nav-h: 72px;
-  --section-py: 8rem;
-  --section-px: 2rem;
+  --pad-x: clamp(1.25rem, 3vw, 2rem);
+  --pad-y: clamp(1rem, 2.5vh, 1.75rem);
+
+  /* fonts — three named roles, no aliases. Anything using a font picks one
+     of these explicitly; never reach for legacy --font-mono or --font-chrome.
+     - --font-ui:       chrome, identity strip, legend, footer — Krypton (rounded UI)
+     - --font-terminal: prompt input, output buffer, command echo, panes — Neon (terminal)
+     - --font-pixel:    the BLACKHEARTH GAMES wordmark only — Press Start 2P
+  */
+  --font-ui: 'Monaspace Krypton', ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
+  --font-terminal: 'Monaspace Neon', ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
+  --font-pixel: 'Press Start 2P', 'Monaspace Krypton', ui-monospace, monospace;
 }
 
+/* light mode — milky-white lavender ground, near-black text, violet accents */
+:root[data-scheme="light"] {
+  --bg: #f1eaf7;
+  --bg-elevated: #e9dff0;
+  --chrome: #ddd0e8;
+  --rule: rgba(80, 50, 120, 0.22);
+  --rule-strong: rgba(80, 50, 120, 0.40);
+
+  --fg: #0d0a12;
+  --fg-bright: #000000;
+  --fg-dim: rgba(13, 10, 18, 0.72);
+  --fg-faint: rgba(13, 10, 18, 0.22);
+  --fg-mute: rgba(13, 10, 18, 0.50);
+  --fg-glow: rgba(120, 70, 200, 0.28);
+  --fg-rgb: 13 10 18;
+}
+
+/* ===== BASE ===== */
 html {
-  scroll-behavior: smooth;
   -webkit-text-size-adjust: 100%;
 }
 
 body {
-  font-family: 'EB Garamond', 'Georgia', serif;
-  font-size: 18px;
-  line-height: 1.75;
-  color: var(--text-body);
-  background: var(--abyss);
+  font-family: var(--font-ui);
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--fg);
+  background: var(--bg);
   overflow-x: hidden;
+  min-height: 100vh;
+  min-height: 100svh;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Film grain overlay */
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  z-index: 9999;
-  pointer-events: none;
-  opacity: 0.025;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
-}
-
-img {
-  max-width: 100%;
-  height: auto;
-  display: block;
-}
-
-a {
-  color: var(--gold);
-  text-decoration: none;
-  transition: color 0.3s ease;
-}
-
-a:hover {
-  color: var(--gold-bright);
+/* Inside the terminal (buffer + prompt + panes) use Monaspace Neon. */
+.buffer,
+.buffer .pane,
+.pane,
+.echo,
+.system,
+.system pre,
+.prompt,
+.prompt__head,
+.prompt__field {
+  font-family: var(--font-terminal);
 }
 
 ::selection {
-  background: var(--gold);
-  color: var(--void);
+  background: var(--fg);
+  color: var(--bg);
 }
 
-/* Accessibility — skip link */
+a {
+  color: var(--fg-bright);
+  text-decoration: underline;
+  text-decoration-color: var(--fg-faint);
+  text-underline-offset: 3px;
+  transition: text-decoration-color 0.2s ease;
+}
+a:hover {
+  text-decoration-color: var(--fg);
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+
+input {
+  font: inherit;
+  color: inherit;
+  background: transparent;
+  border: 0;
+  outline: none;
+}
+
+img { max-width: 100%; height: auto; display: block; }
+
+/* visually hidden — for screen-reader-only labels */
+.vh {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* skip link */
 .skip-link {
   position: absolute;
   top: -100%;
   left: 1rem;
   padding: 0.5rem 1rem;
-  background: var(--gold);
-  color: var(--void);
-  font-family: 'Cinzel', serif;
+  background: var(--fg);
+  color: var(--bg);
+  font-family: var(--font-ui);
   font-size: 0.85rem;
   z-index: 10000;
-  border-radius: 0 0 4px 4px;
+  text-decoration: none;
 }
-
-.skip-link:focus {
-  top: 0;
-}
+.skip-link:focus { top: 0.5rem; }
 
 :focus-visible {
-  outline: 2px solid var(--gold);
+  outline: 2px solid var(--fg);
   outline-offset: 3px;
 }
 
-/* ===== LAYOUT ===== */
-.container {
-  max-width: var(--max-w);
-  margin: 0 auto;
-  padding: 0 var(--section-px);
-}
-
-
 /* ==========================================================================
-   NAVIGATION
+   STATIC FALLBACK — visible without JS
+   When .has-js is on <html>, REPL chrome shows and static panes hide.
    ========================================================================== */
 
-.nav {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: var(--nav-h);
-  z-index: 1000;
-  background: rgba(17, 14, 10, 0.4);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-bottom: 1px solid transparent;
-  transition: background 0.4s ease, border-color 0.4s ease;
-}
+/* No-JS / default visible state */
+html:not(.has-js) .repl-only { display: none !important; }
+html:not(.has-js) .static-only { display: block; }
+html.has-js .static-only { display: none !important; }
+html:not(.has-js) [data-pane] { display: block !important; }
 
-.nav.is-scrolled {
-  background: rgba(17, 14, 10, 0.95);
-  border-bottom-color: rgba(212, 160, 64, 0.08);
-}
-
-.nav__inner {
-  max-width: var(--max-w);
-  margin: 0 auto;
-  padding: 0 var(--section-px);
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.nav__logo {
-  font-family: 'Cinzel Decorative', 'Cinzel', serif;
-  font-size: 0.85rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  color: var(--text-bright);
-  opacity: 0.85;
-  transition: opacity 0.3s ease;
-}
-
-.nav__logo:hover {
-  opacity: 1;
-  color: var(--text-bright);
-}
-
-/* Hidden checkbox toggle */
-.nav__toggle {
-  display: none;
-}
-
-.nav__hamburger {
-  display: none;
-  flex-direction: column;
-  gap: 5px;
-  cursor: pointer;
-  padding: 8px;
-  z-index: 10;
-}
-
-.nav__hamburger span {
+html:not(.has-js) body {
   display: block;
-  width: 22px;
-  height: 2px;
-  background: var(--gold);
-  transition: transform 0.3s ease, opacity 0.3s ease;
-  transform-origin: center;
+  padding: 2.5rem 1.5rem;
+  max-width: 760px;
+  margin: 0 auto;
+  font-size: 16px;
+  line-height: 1.7;
 }
-
-.nav__links {
-  display: flex;
-  align-items: center;
-  gap: 2.5rem;
-  list-style: none;
+html:not(.has-js) .window { display: contents; }
+html:not(.has-js) .window__body { padding: 0; display: block; }
+html:not(.has-js) .identity {
+  text-align: center;
+  padding: 0 0 2.5rem;
+  border-bottom: 1px dashed var(--rule);
+  margin-bottom: 2.5rem;
 }
-
-.nav__links a {
-  font-family: 'Cinzel', serif;
-  font-size: 0.75rem;
-  font-weight: 500;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--text-muted);
-  position: relative;
-  padding: 0.25rem 0;
-  transition: color 0.3s ease;
-}
-
-.nav__links a::after {
-  content: '';
-  position: absolute;
-  bottom: -2px;
-  left: 0;
-  width: 0;
-  height: 1px;
-  background: var(--gold);
-  transition: width 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.nav__links a:hover {
-  color: var(--gold);
-}
-
-.nav__links a:hover::after {
+html:not(.has-js) .window__wordmark {
+  flex: none;
+  font-size: clamp(1.25rem, 4.5vw, 2.1rem);
+  text-align: center;
   width: 100%;
 }
-
-
-/* ==========================================================================
-   HERO
-   ========================================================================== */
-
-.hero {
-  position: relative;
-  min-height: 100vh;
-  min-height: 100dvh;
-  padding-top: var(--nav-h);
-  display: flex;
-  align-items: center;
+html:not(.has-js) .window__chrome--top {
   justify-content: center;
-  overflow: hidden;
+  border-bottom: 1px dashed var(--rule);
+  padding: 1.5rem 1rem;
 }
-
-/* --- Tavern atmosphere --- */
-.hero__tavern {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  background:
-    /* Hearth glow — warm light radiating up from the fireplace */
-    radial-gradient(ellipse at 50% 98%, rgba(208, 112, 40, 0.30) 0%, transparent 45%),
-    radial-gradient(ellipse at 50% 85%, rgba(184, 72, 32, 0.15) 0%, transparent 55%),
-    /* Ambient warmth filling the room */
-    radial-gradient(ellipse at 50% 60%, rgba(160, 100, 40, 0.06) 0%, transparent 70%),
-    /* Torch glow — left wall */
-    radial-gradient(ellipse at 12% 35%, rgba(212, 160, 64, 0.05) 0%, transparent 30%),
-    /* Torch glow — right wall */
-    radial-gradient(ellipse at 88% 35%, rgba(212, 160, 64, 0.05) 0%, transparent 30%),
-    /* Dark stone/timber base */
-    linear-gradient(to bottom, var(--void) 0%, var(--obsidian) 60%, var(--shadow) 100%);
+html:not(.has-js) .window__controls { display: none; }
+html:not(.has-js) .identity__welcome {
+  margin: 1.5rem auto 0;
+  max-width: 60ch;
+  color: var(--fg-dim);
+  text-align: left;
 }
+html:not(.has-js) .identity__welcome .prompt-glyph { color: var(--fg-mute); }
 
-/* Pulsing hearth glow — fire breathing */
-.hero__hearth-glow {
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(ellipse at 50% 100%, rgba(208, 112, 40, 0.18) 0%, transparent 45%),
-    radial-gradient(ellipse at 50% 95%, rgba(184, 72, 32, 0.10) 0%, transparent 55%);
-  animation: hearth-pulse 4s ease-in-out infinite alternate;
+html:not(.has-js) .pane {
+  padding: 2rem 0;
+  border-top: 1px dashed var(--rule);
+  scroll-margin-top: 2rem;
 }
-
-/* Bottom edge fade to page background */
-.hero__tavern::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 20%;
-  background: linear-gradient(to bottom, transparent, var(--abyss));
-  pointer-events: none;
-}
-
-/* --- Ember particles --- */
-.hero__embers {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 80%;
-  z-index: 2;
-  pointer-events: none;
-  overflow: hidden;
-}
-
-.ember {
-  position: absolute;
-  bottom: -10px;
-  border-radius: 50%;
-  opacity: 0;
-  animation: ember-rise linear infinite;
-}
-
-/* Gold embers */
-.ember:nth-child(even) {
-  background: var(--gold);
-  box-shadow: 0 0 6px var(--gold-glow);
-}
-
-/* Warm orange embers */
-.ember:nth-child(odd) {
-  background: var(--ember);
-  box-shadow: 0 0 6px var(--ember-glow);
-}
-
-/* Embers clustered near center — rising from the hearth */
-.ember:nth-child(1)  { left: 38%; width: 2px; height: 2px; animation-duration: 9s;   animation-delay: 0s; }
-.ember:nth-child(2)  { left: 45%; width: 3px; height: 3px; animation-duration: 12s;  animation-delay: 2.5s; }
-.ember:nth-child(3)  { left: 52%; width: 2px; height: 2px; animation-duration: 10s;  animation-delay: 4.2s; }
-.ember:nth-child(4)  { left: 48%; width: 3px; height: 3px; animation-duration: 8.5s; animation-delay: 1.3s; }
-.ember:nth-child(5)  { left: 55%; width: 2px; height: 2px; animation-duration: 11s;  animation-delay: 3.7s; }
-.ember:nth-child(6)  { left: 42%; width: 3px; height: 3px; animation-duration: 7.5s; animation-delay: 5.5s; }
-.ember:nth-child(7)  { left: 60%; width: 2px; height: 2px; animation-duration: 13s;  animation-delay: 6.8s; }
-.ember:nth-child(8)  { left: 35%; width: 2px; height: 2px; animation-duration: 10.5s; animation-delay: 7.2s; }
-.ember:nth-child(9)  { left: 50%; width: 2px; height: 2px; animation-duration: 9.5s; animation-delay: 0.8s; }
-.ember:nth-child(10) { left: 46%; width: 3px; height: 3px; animation-duration: 11.5s; animation-delay: 4.8s; }
-.ember:nth-child(11) { left: 57%; width: 2px; height: 2px; animation-duration: 8s;   animation-delay: 2.1s; }
-.ember:nth-child(12) { left: 40%; width: 2px; height: 2px; animation-duration: 10s;  animation-delay: 6.1s; }
-
-/* --- Hero content --- */
-.hero__content {
-  position: relative;
-  z-index: 3;
-  text-align: center;
-  padding: 0 2rem;
-}
-
-/* Firelight glow behind the logo */
-.hero__content::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -55%);
-  width: min(90vw, calc((100dvh - var(--nav-h)) * 1.8));
-  height: min(55vh, calc((100dvh - var(--nav-h)) * 0.85));
-  background: radial-gradient(ellipse,
-    rgba(212, 160, 64, 0.14) 0%,
-    rgba(208, 112, 40, 0.06) 40%,
-    transparent 70%);
-  animation: firelight-breathe 6s ease-in-out infinite;
-  pointer-events: none;
-}
-
-/* Logo scales with both viewport width AND available vertical space
-   (viewport height minus the fixed nav), so it grows to fill the screen
-   on big monitors but never bleeds past the header or off the sides. */
-.hero__logo {
-  width: min(85vw, calc((100dvh - var(--nav-h)) * 1.5));
-  height: auto;
-  margin: 0 auto clamp(1rem, 3vh, 2.5rem);
-  position: relative;
-  filter: drop-shadow(0 0 25px rgba(212, 160, 64, 0.18));
-  animation: logo-glow 4.5s ease-in-out infinite;
-}
-
-.hero__tagline {
-  font-family: 'Cinzel', serif;
-  font-size: clamp(0.85rem, min(1.9vw, 2.6vh), 1.5rem);
-  font-weight: 400;
-  letter-spacing: 0.28em;
-  text-transform: uppercase;
-  color: var(--gold);
-  margin-bottom: 1.5rem;
-}
-
-/* Ornamental divider: line — diamond — line */
-.hero__ornament {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.75rem;
-}
-
-.hero__ornament-line {
-  display: block;
-  width: 60px;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--gold-dim), transparent);
-}
-
-.hero__ornament-diamond {
-  display: block;
-  width: 6px;
-  height: 6px;
-  border: 1px solid var(--gold-dim);
-  transform: rotate(45deg);
-}
-
-/* Scroll indicator */
-.hero__scroll-cue {
-  position: absolute;
-  bottom: 2.5rem;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 3;
-  width: 1px;
-  height: 48px;
-  overflow: hidden;
-}
-
-.hero__scroll-line {
-  display: block;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(to bottom, transparent, var(--gold), transparent);
-  animation: scroll-slide 2.2s ease-in-out infinite;
-}
-
-
-/* ==========================================================================
-   SECTIONS — Shared styles
-   ========================================================================== */
-
-.section {
-  padding: var(--section-py) 0;
-  position: relative;
-}
-
-.section__header {
-  text-align: center;
-  margin-bottom: 4rem;
-}
-
-.section__label {
-  display: block;
-  font-family: 'Cinzel', serif;
-  font-size: 0.7rem;
-  font-weight: 600;
-  letter-spacing: 0.35em;
-  text-transform: uppercase;
-  color: var(--gold-dim);
-  margin-bottom: 0.75rem;
-}
-
-.section__title {
-  font-family: 'Cinzel Decorative', 'Cinzel', serif;
-  font-size: clamp(1.5rem, 4vw, 2.3rem);
-  font-weight: 700;
-  color: var(--text-bright);
-  line-height: 1.25;
-}
-
-/* Section ornament: line — dot — line */
-.section__ornament {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.6rem;
-  margin-top: 1.25rem;
-}
-
-.ornament-line {
-  display: block;
-  width: 40px;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--gold-dim), transparent);
-}
-
-.ornament-dot {
-  display: block;
-  width: 4px;
-  height: 4px;
-  background: var(--gold-dim);
-  border-radius: 50%;
-}
-
-
-/* ==========================================================================
-   ABOUT
-   ========================================================================== */
-
-.about__content {
-  max-width: 720px;
-  margin: 0 auto;
-  text-align: center;
-}
-
-.about__lead {
-  font-size: 1.25rem;
-  color: var(--text-bright);
-  line-height: 1.85;
-  margin-bottom: 1.5rem;
-  font-style: italic;
-}
-
-.about__content p + p {
-  margin-top: 1rem;
-}
-
-
-/* ==========================================================================
-   GAMES
-   ========================================================================== */
-
-.games {
-  background:
-    linear-gradient(to bottom,
-      var(--abyss),
-      var(--obsidian) 15%,
-      var(--obsidian) 85%,
-      var(--abyss));
-}
-
-.game-card {
-  display: grid;
-  grid-template-columns: 1fr 1.3fr;
-  gap: 3rem;
-  align-items: center;
-  background: linear-gradient(135deg, var(--shadow) 0%, var(--obsidian) 100%);
-  border: 1px solid rgba(212, 160, 64, 0.10);
-  padding: 2.5rem;
-  position: relative;
-  overflow: hidden;
-}
-
-/* Subtle firelight radiance inside the card */
-.game-card::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(ellipse at 25% 50%, var(--hearth-glow) 0%, transparent 60%);
-  pointer-events: none;
-}
-
-.game-card__frame {
-  position: relative;
-}
-
-.game-card__art {
-  aspect-ratio: 4 / 3;
-  background: radial-gradient(ellipse at center, var(--shadow) 0%, var(--void) 100%);
-  border: 2px solid var(--gold-dim);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  overflow: hidden;
-}
-
-/* Inner glow inside the art frame */
-.game-card__art::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(circle at center, rgba(212, 160, 64, 0.06) 0%, transparent 65%);
-}
-
-/* Gilded corner accents */
-.game-card__art::after {
-  content: '';
-  position: absolute;
-  inset: 6px;
-  border: 1px solid rgba(212, 160, 64, 0.08);
-  pointer-events: none;
-}
-
-.game-card__logo {
-  width: 120px;
-  height: auto;
-  image-rendering: pixelated;
-  image-rendering: -moz-crisp-edges;
-  filter: drop-shadow(0 0 25px rgba(208, 112, 40, 0.4));
-  position: relative;
-  z-index: 1;
-  animation: logo-glow 4.5s ease-in-out infinite;
-}
-
-.game-card__info {
-  position: relative;
-  z-index: 1;
-}
-
-.game-card__title {
-  font-family: 'Cinzel Decorative', serif;
-  font-size: clamp(1.2rem, 3vw, 1.7rem);
-  font-weight: 700;
-  color: var(--text-bright);
-  margin-bottom: 0.5rem;
-}
-
-.game-card__genre {
-  display: block;
-  font-family: 'Cinzel', serif;
-  font-size: 0.65rem;
-  font-weight: 500;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--gold-dim);
+html:not(.has-js) .pane:first-of-type { border-top: 0; padding-top: 0; }
+html:not(.has-js) .pane__title {
+  font-size: 1rem;
   margin-bottom: 1.25rem;
 }
+html:not(.has-js) .kv__row { grid-template-columns: 10rem 1fr; }
+html:not(.has-js) .ethos__row { grid-template-columns: 14rem 1fr; }
+html:not(.has-js) .chip-row { margin-top: 1.25rem; }
 
-.game-card__desc {
-  margin-bottom: 1.5rem;
-  line-height: 1.8;
-}
-
-.game-card__features {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-bottom: 2rem;
-}
-
-.game-card__features span {
-  font-family: 'Cinzel', serif;
-  font-size: 0.6rem;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  padding: 0.4rem 0.8rem;
-  border: 1px solid rgba(212, 160, 64, 0.18);
-  color: var(--gold);
-  background: rgba(212, 160, 64, 0.04);
-  transition: background 0.3s ease, border-color 0.3s ease;
-}
-
-.game-card__features span:hover {
-  background: rgba(212, 160, 64, 0.08);
-  border-color: rgba(212, 160, 64, 0.3);
-}
-
-.game-card__actions {
-  display: flex;
-  gap: 1rem;
-  flex-wrap: wrap;
-}
-
-
-/* ==========================================================================
-   BUTTONS
-   ========================================================================== */
-
-.btn {
-  display: inline-block;
-  font-family: 'Cinzel', serif;
-  font-size: 0.68rem;
-  font-weight: 600;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  padding: 0.8rem 1.8rem;
-  border: 1px solid;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  position: relative;
-}
-
-.btn--gold {
-  border-color: var(--gold);
-  color: var(--gold);
-  background: rgba(212, 160, 64, 0.06);
-}
-
-.btn--gold:hover {
-  background: var(--gold);
-  color: var(--void);
-  box-shadow: 0 0 24px var(--gold-glow);
-}
-
-.btn--hearth {
-  border-color: var(--hearth);
-  color: var(--hearth-bright);
-  background: rgba(184, 72, 32, 0.06);
-}
-
-.btn--hearth:hover {
-  background: var(--hearth);
-  color: var(--text-bright);
-  box-shadow: 0 0 24px var(--hearth-glow);
-}
-
-
-/* ==========================================================================
-   PHILOSOPHY
-   ========================================================================== */
-
-.philosophy__grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 2rem;
-}
-
-.philosophy__card {
+html:not(.has-js) .static-footer {
+  margin-top: 3rem;
+  padding-top: 1.5rem;
+  border-top: 1px dashed var(--rule);
   text-align: center;
-  padding: 2.5rem 2rem;
-  border: 1px solid rgba(212, 160, 64, 0.06);
-  background: linear-gradient(180deg, rgba(36, 30, 22, 0.5) 0%, rgba(17, 14, 10, 0.5) 100%);
-  transition: border-color 0.4s ease, transform 0.4s ease, box-shadow 0.4s ease;
+  font-size: 0.85rem;
+  color: var(--fg-dim);
 }
+html:not(.has-js) .static-footer p + p { margin-top: 0.4rem; }
+html:not(.has-js) .static-footer .dim { color: var(--fg-mute); font-size: 0.8rem; }
+html:not(.has-js) .static-footer a { color: var(--fg); }
 
-.philosophy__card:hover {
-  border-color: rgba(212, 160, 64, 0.18);
-  transform: translateY(-4px);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-}
-
-/* Diamond ornament icon */
-.philosophy__icon {
-  width: 28px;
-  height: 28px;
-  margin: 0 auto 1.5rem;
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.philosophy__icon::before {
-  content: '';
-  position: absolute;
-  width: 14px;
-  height: 14px;
-  border: 1px solid var(--gold);
-  transform: rotate(45deg);
-}
-
-.philosophy__icon::after {
-  content: '';
-  position: absolute;
-  width: 8px;
-  height: 8px;
-  border: 1px solid var(--gold-dim);
-  transform: rotate(45deg);
-}
-
-.philosophy__heading {
-  font-family: 'Cinzel', serif;
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--text-bright);
-  letter-spacing: 0.06em;
-  margin-bottom: 1rem;
-}
-
-.philosophy__card p {
-  font-size: 0.95rem;
-  line-height: 1.8;
-  color: var(--text-muted);
-}
-
+/* With JS: static panes are off until cloned into buffer */
+html.has-js [data-pane] { display: none; }
 
 /* ==========================================================================
-   FOOTER
+   SCANLINES OVERLAY
    ========================================================================== */
-
-.footer {
-  padding: 4rem 2rem 2.5rem;
-  border-top: 1px solid rgba(212, 160, 64, 0.06);
+html.has-js body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 2px,
+    rgba(var(--fg-rgb) / 0.05) 2px,
+    rgba(var(--fg-rgb) / 0.05) 3px
+  );
+  mix-blend-mode: overlay;
+  opacity: 0.6;
 }
+:root[data-scheme="light"] body::after { display: none; }
 
-.footer__inner {
+/* ==========================================================================
+   TERMINAL WINDOW FRAME
+   ========================================================================== */
+html.has-js body {
   display: flex;
-  align-items: center;
+  align-items: stretch;
   justify-content: center;
-  gap: 2.5rem;
-  flex-wrap: wrap;
+  padding: clamp(0.75rem, 2vh, 1.5rem);
+  height: 100vh;
+  height: 100svh;
+  min-height: 0;
+  overflow: hidden;
 }
 
-.footer__text {
+.window {
+  flex: 1;
+  max-width: var(--max-w);
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 0.75rem;
-  text-align: center;
+  background: var(--bg);
+  border: 1px solid rgba(var(--fg-rgb) / 0.35);
+  border-radius: 4px;
+  box-shadow:
+    /* Arcane glow — soft inner halo, tight outer ring, diffuse outer bloom */
+    inset 0 0 60px rgba(var(--fg-rgb) / 0.04),
+    0 0 0 1px rgba(var(--fg-rgb) / 0.25),
+    0 0 24px rgba(var(--fg-rgb) / 0.32),
+    0 0 80px rgba(var(--fg-rgb) / 0.18),
+    0 0 160px rgba(var(--fg-rgb) / 0.08),
+    0 20px 60px -20px rgba(0, 0, 0, 0.6);
+  overflow: hidden;
+  height: calc(100vh - 1.5rem);
+  height: calc(100svh - 1.5rem);
+  min-height: 0;
 }
 
-.footer__brand {
+/* Light mode: a layered violet drop-shadow grounds the window on the parchment */
+:root[data-scheme="light"] .window {
+  border-color: var(--rule-strong);
+  box-shadow:
+    0 0 0 1px rgba(80, 50, 120, 0.22),
+    0 2px 6px rgba(80, 50, 120, 0.10),
+    0 8px 24px -4px rgba(80, 50, 120, 0.18),
+    0 24px 60px -12px rgba(80, 50, 120, 0.28),
+    0 40px 120px -20px rgba(80, 50, 120, 0.22);
+}
+
+/* CHROME — title bar + status bar */
+.window__chrome {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.55rem 1rem;
+  background: var(--chrome);
+  border-bottom: 1px solid var(--rule);
+  font-family: var(--font-ui);
+  font-size: 0.78rem;
+  letter-spacing: 0.02em;
+  color: var(--fg-dim);
+  flex-shrink: 0;
+}
+.window__chrome--bottom {
+  border-bottom: 0;
+  border-top: 1px solid var(--rule);
+  justify-content: space-between;
+  flex-wrap: wrap;
+  row-gap: 0.5rem;
+}
+
+.window__wordmark {
+  flex: 1;
+  margin: 0;
+  font-family: var(--font-pixel);
+  font-weight: 400;
+  font-size: clamp(1rem, 2.4vw, 1.6rem);
+  letter-spacing: 0;
+  line-height: 1.1;
+  color: var(--fg-bright);
+  text-shadow:
+    0 0 18px rgba(var(--fg-rgb) / 0.35),
+    0 0 40px rgba(var(--fg-rgb) / 0.15);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+:root[data-scheme="light"] .window__wordmark { text-shadow: none; }
+
+.window__controls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
   flex-shrink: 0;
 }
 
-.footer__logo {
-  width: 280px;
-  height: auto;
-  opacity: 0.5;
-  transition: opacity 0.3s ease;
+.window__clock {
+  color: var(--fg-dim);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 
-.footer__brand:hover .footer__logo {
-  opacity: 0.85;
-}
-
-.footer__nav {
+/* WINDOW BODY */
+.window__body {
+  flex: 1;
   display: flex;
+  flex-direction: column;
+  padding: clamp(1rem, 2.5vh, 1.75rem) var(--pad-x) 0;
+  overflow: hidden;
+}
+
+/* ==========================================================================
+   IDENTITY STRIP
+   ========================================================================== */
+.identity { padding-bottom: 1.25rem; }
+
+.identity__tag {
+  font-size: 0.85rem;
+  color: var(--fg-dim);
+  letter-spacing: 0.04em;
+}
+
+.identity__status {
+  display: inline-flex;
   align-items: center;
-  gap: 1rem;
-  flex-wrap: wrap;
-  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 0.6rem;
+  font-size: 0.78rem;
+  color: var(--fg-mute);
+  letter-spacing: 0.02em;
 }
 
-.footer__nav a {
-  font-family: 'Cinzel', serif;
-  font-size: 0.65rem;
-  font-weight: 500;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--text-muted);
-  transition: color 0.3s ease;
+.led {
+  display: inline-block;
+  width: 8px; height: 8px;
+  background: var(--fg);
+  border-radius: 50%;
+  box-shadow: 0 0 8px var(--fg-glow);
+  animation: led-pulse 3.4s ease-in-out infinite;
+}
+@keyframes led-pulse {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 1; }
 }
 
-.footer__nav a:hover {
-  color: var(--gold);
+.identity__welcome {
+  margin-top: 1.25rem;
+  font-size: 0.95rem;
+  color: var(--fg-bright);
 }
-
-.footer__dot {
-  color: var(--text-muted);
-  opacity: 0.3;
-}
-
-.footer__copy {
-  font-size: 0.8rem;
-  color: var(--text-muted);
-  opacity: 0.5;
-}
-
+.prompt-glyph { color: var(--fg-dim); margin-right: 0.4em; }
 
 /* ==========================================================================
-   SCROLL REVEAL
+   CHIPS — in-pane follow-up navigation + mobile bottom nav
    ========================================================================== */
-
-[data-reveal] {
-  opacity: 0;
-  transform: translateY(28px);
+.chips--mobile {
+  display: none; /* desktop hides; mobile media query reveals */
+}
+.chip {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.45rem;
+  padding: 0.45rem 0.8rem;
+  border: 1px solid var(--rule);
+  background: rgba(var(--fg-rgb) / 0.03);
+  color: var(--fg);
+  font-family: var(--font-ui);
+  font-size: 0.82rem;
+  text-decoration: none;
   transition:
-    opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1),
-    transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+    border-color 0.18s ease,
+    background 0.18s ease,
+    color 0.18s ease,
+    transform 0.18s ease;
+  white-space: nowrap;
 }
-
-[data-reveal].is-visible {
-  opacity: 1;
-  transform: translateY(0);
+.chip:hover, .chip:focus-visible {
+  border-color: var(--fg);
+  background: rgba(var(--fg-rgb) / 0.08);
+  color: var(--fg-bright);
 }
-
-/* Staggered reveal for sibling elements */
-[data-reveal]:nth-child(2) { transition-delay: 0.12s; }
-[data-reveal]:nth-child(3) { transition-delay: 0.24s; }
-[data-reveal]:nth-child(4) { transition-delay: 0.36s; }
-
+.chip:active { transform: translateY(1px); }
+.chip__arrow { color: var(--fg-dim); }
+.chip__label { color: inherit; }
+.chip__cmd {
+  color: var(--fg-mute);
+  font-size: 0.72rem;
+  padding-left: 0.5em;
+  border-left: 1px solid var(--rule);
+  margin-left: 0.25em;
+}
+.chip--small {
+  font-size: 0.72rem;
+  padding: 0.3rem 0.6rem;
+}
+.chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.85rem;
+}
 
 /* ==========================================================================
-   ANIMATIONS
+   OUTPUT BUFFER
    ========================================================================== */
+.buffer {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0.5rem 0 0;
+  scrollbar-width: thin;
+  scrollbar-color: var(--fg-faint) transparent;
+}
+.buffer:empty { padding: 0; }
+.buffer::-webkit-scrollbar { width: 8px; }
+.buffer::-webkit-scrollbar-track { background: transparent; }
+.buffer::-webkit-scrollbar-thumb { background: var(--fg-faint); border-radius: 4px; }
+.buffer::-webkit-scrollbar-thumb:hover { background: var(--fg-mute); }
 
-@keyframes hearth-pulse {
-  0%   { opacity: 0.5; }
-  100% { opacity: 1; }
+/* The most recently appended typewriter target fills the viewport vertically
+   so scrollNodeToTop can always land its echo at the visible top, even for
+   short results. The form uses a JS-set negative margin-top to overlap the
+   pane's empty bottom region — so it visually still sits right after the
+   actual content rather than at the bottom of the inflated pane. */
+.buffer .is-latest-output {
+  min-height: 100%;
 }
 
-@keyframes firelight-breathe {
-  0%, 100% {
-    transform: translate(-50%, -55%) scale(1);
-    opacity: 0.6;
-  }
-  50% {
-    transform: translate(-50%, -55%) scale(1.15);
-    opacity: 1;
-  }
+.buffer .pane,
+.buffer .echo,
+.buffer .system {
+  padding: 0.75rem 0 0.5rem;
+}
+.buffer .pane + .pane,
+.buffer .echo + .pane,
+.buffer .echo + .system,
+.buffer .system + .pane {
+  margin-top: 0.5rem;
+  border-top: 1px dashed var(--rule);
 }
 
-@keyframes logo-glow {
-  0%, 100% {
-    filter: drop-shadow(0 0 20px rgba(212, 160, 64, 0.14));
-  }
-  50% {
-    filter:
-      drop-shadow(0 0 35px rgba(212, 160, 64, 0.28))
-      drop-shadow(0 0 70px rgba(208, 112, 40, 0.12));
-  }
+.echo {
+  color: var(--fg-dim);
+  font-size: 0.85rem;
+  white-space: pre-wrap;
+}
+.echo__head { color: var(--fg-mute); margin-right: 0.4em; }
+.echo__cmd { color: var(--fg-bright); }
+
+.system { color: var(--fg); }
+.system pre {
+  font-family: var(--font-terminal);
+  font-size: 0.85rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: inherit;
+}
+.system .dim { color: var(--fg-mute); }
+.system .accent { color: var(--fg-bright); }
+/* error spans get a brighter, bolder treatment so they read as warnings
+   instead of inheriting the plain --fg of normal output. */
+.system .err {
+  color: var(--fg-bright);
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-color: var(--fg-dim);
+  text-decoration-style: dotted;
+  text-underline-offset: 3px;
+}
+.system .ok { color: var(--fg-bright); }
+
+/* ==========================================================================
+   PANES (cloned content)
+   ========================================================================== */
+.pane__title {
+  font-family: var(--font-terminal);
+  font-weight: 700;
+  font-size: 1.05rem;
+  letter-spacing: 0.04em;
+  color: var(--fg-bright);
+  text-transform: lowercase;
+  margin-bottom: 0.9rem;
+  line-height: 1.4;
+}
+.pane__subhead {
+  font-size: 0.78rem;
+  color: var(--fg-dim);
+  letter-spacing: 0.06em;
+  margin: 0.85rem 0 0.45rem;
+  text-transform: lowercase;
+}
+.pane__subhead::after {
+  content: ' ─────────';
+  color: var(--fg-faint);
+}
+.pane__footer {
+  font-size: 0.85rem;
+  color: var(--fg-mute);
+  margin-top: 1rem;
+}
+.pane__footer .dim { color: var(--fg-faint); }
+
+/* k/v rows */
+.kv {
+  display: grid;
+  gap: 0.2rem;
+  font-size: 0.9rem;
+}
+.kv__row {
+  display: grid;
+  grid-template-columns: 8rem 1fr;
+  gap: 1rem;
+}
+.kv__row dt {
+  color: var(--fg-mute);
+  font-weight: 500;
+}
+.kv__row dd { color: var(--fg); }
+
+.prose {
+  margin: 0.85rem 0;
+  font-size: 0.92rem;
+  line-height: 1.65;
+  color: var(--fg);
+  max-width: 60ch;
 }
 
-@keyframes ember-rise {
-  0% {
-    opacity: 0;
-    transform: translateY(0) translateX(0);
-  }
-  6% {
-    opacity: 0.7;
-  }
-  25% {
-    transform: translateY(-16vh) translateX(12px);
-  }
-  50% {
-    opacity: 0.35;
-    transform: translateY(-32vh) translateX(-8px);
-  }
-  75% {
-    transform: translateY(-50vh) translateX(16px);
-    opacity: 0.15;
-  }
-  100% {
-    opacity: 0;
-    transform: translateY(-65vh) translateX(4px);
-  }
+/* ethos rows */
+.ethos { display: grid; gap: 1rem; }
+.ethos__row {
+  display: grid;
+  grid-template-columns: 13rem 1fr;
+  gap: 1.5rem;
+  font-size: 0.92rem;
+}
+.ethos__row dt {
+  color: var(--fg-bright);
+  font-weight: 600;
+}
+.ethos__row dd {
+  color: var(--fg-dim);
+  line-height: 1.6;
+  max-width: 56ch;
+}
+.arrow { color: var(--fg-dim); margin-right: 0.4em; }
+
+/* game block */
+.game { margin-top: 0.4rem; }
+.game__head { font-size: 0.95rem; margin-bottom: 0.5rem; }
+.game__head em {
+  color: var(--fg-mute);
+  font-style: normal;
+  font-size: 0.82rem;
+  letter-spacing: 0.04em;
+}
+.game__body {
+  color: var(--fg-dim);
+  font-size: 0.88rem;
+  margin: 0 0 0.8rem 1.4em;
+  line-height: 1.6;
 }
 
-@keyframes scroll-slide {
-  0%   { transform: translateY(-100%); }
-  100% { transform: translateY(100%); }
+/* contact */
+.contact__addr {
+  font-family: var(--font-ui);
+  font-size: 1.05rem;
+  margin: 0.5rem 0;
+}
+.contact__addr a {
+  color: var(--fg-bright);
+  text-decoration-color: var(--fg);
 }
 
+/* ==========================================================================
+   PROMPT (lives inside the buffer — flows with output like a real terminal,
+   and `position: sticky` pins it to the visible bottom when the user scrolls
+   up so the prompt isn't pushed off the screen. The opaque background masks
+   anything scrolling underneath as it sticks.)
+   ========================================================================== */
+.prompt {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  padding: 0.5rem 0 0.4rem;
+  background: var(--bg);
+}
+.prompt__line {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  flex: 1;
+  min-width: 0;
+}
+.prompt__head {
+  color: var(--fg-dim);
+  font-size: 0.88rem;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* Field wrapper: a positioning context. The mirror inside defines the
+   layout box; the real input is absolutely overlaid on top with identical
+   font metrics so the user's cursor sits exactly where the block-caret renders. */
+.prompt__field {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  display: block;
+  font-family: var(--font-terminal);
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+/* Visual mirror — defines the field's height. Renders typed text, block
+   caret, after-cursor text, and dim ghost suggestion. */
+.prompt__mirror {
+  display: block;
+  font: inherit;
+  line-height: inherit;
+  white-space: pre-wrap;
+  word-break: break-all;
+  pointer-events: none;
+  min-height: 1em;
+}
+
+/* Real input — captures keystrokes, but visually hidden (text + caret
+   transparent). Absolutely overlaid on the mirror with matching metrics. */
+.prompt__input {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  text-indent: 0;
+  background: transparent;
+  color: transparent;
+  caret-color: transparent;
+  -webkit-text-fill-color: transparent;
+  font: inherit;
+  line-height: inherit;
+  box-sizing: border-box;
+  z-index: 1;
+}
+.prompt__input::placeholder { color: transparent; }
+.prompt__input:focus,
+.prompt__input:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+.prompt__before { color: var(--fg-bright); }
+.prompt__after { color: var(--fg-bright); }
+.prompt__ghost { color: var(--fg-faint); }
+.prompt__placeholder {
+  color: var(--fg-mute);
+  font-style: italic;
+}
+.prompt__field.has-input .prompt__placeholder { display: none; }
+.prompt__field:not(.has-input) .prompt__before,
+.prompt__field:not(.has-input) .prompt__after,
+.prompt__field:not(.has-input) .prompt__ghost { display: none; }
+
+/* Block cursor — 1ch wide, overlays the char at the cursor position.
+   - The char is the caret's text content (inline, aligns with siblings naturally).
+   - A ::before pseudo draws the violet block, positioned absolutely so it
+     extends slightly above and below the text line without disturbing layout.
+   - Two sync'd animations: block opacity blinks; char color flips between
+     bg (inverted, when block is "on") and fg (normal, when block is "off")
+     so the character stays readable through the entire blink cycle. */
+.prompt__caret {
+  display: inline-block;
+  width: 1ch;
+  min-width: 1ch;
+  position: relative;
+  text-align: center;
+  white-space: pre;
+  z-index: 0;
+  color: var(--fg);
+  animation: caret-char-blink 1.05s steps(1) infinite;
+}
+.prompt__caret::before {
+  content: '';
+  position: absolute;
+  top: -0.05em;
+  bottom: -0.18em;
+  left: 0;
+  right: 0;
+  background: var(--fg);
+  z-index: -1;
+  animation: caret-block-blink 1.05s steps(1) infinite;
+}
+@keyframes caret-block-blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+@keyframes caret-char-blink {
+  /* When the block is opaque, render the char in bg color (inverted).
+     When the block fades to invisible, return char to fg color (normal). */
+  0%, 49% { color: var(--bg); }
+  50%, 100% { color: var(--fg); }
+}
+/* Blurred state: hollow outlined block, no blink, char in normal fg color */
+.prompt__field:not(.is-focused) .prompt__caret {
+  animation: none;
+  color: var(--fg);
+}
+.prompt__field:not(.is-focused) .prompt__caret::before {
+  animation: none;
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--fg-mute);
+  opacity: 1;
+}
+
+/* ==========================================================================
+   STATUS BAR
+   ========================================================================== */
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 1.2rem;
+  row-gap: 0.25rem;
+  color: var(--fg-mute);
+  font-size: 0.92rem;
+}
+.legend kbd {
+  font-family: var(--font-ui);
+  color: var(--fg);
+  border: 1px solid var(--rule);
+  padding: 0.05rem 0.4rem;
+  border-radius: 2px;
+  font-size: 0.86em;
+  letter-spacing: 0;
+}
+.legend--mobile { display: none; }
+.legend__status {
+  color: var(--fg-bright);
+  font-family: var(--font-ui);
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+.legend__status::before {
+  content: '● ';
+  color: var(--fg);
+}
+
+/* ==========================================================================
+   PROMPT INPUT — mobile rules
+   Width-based OR (width≤1024 AND coarse-pointer-no-hover)
+   ========================================================================== */
+@media (max-width: 768px),
+       ((hover: none) and (pointer: coarse) and (max-width: 1024px)) {
+
+  body { padding: 0.5rem; font-size: 14px; }
+  html.has-js body { height: 100vh; height: 100svh; }
+  .window {
+    height: calc(100vh - 1rem);
+    height: calc(100svh - 1rem);
+    border-radius: 2px;
+  }
+  .window__chrome { padding: 0.45rem 0.75rem; gap: 0.5rem; font-size: 0.92rem; }
+  .window__controls { gap: 0.5rem; }
+  .window__clock { display: none; }
+
+  .window__body { padding: 1rem 1rem 0; }
+
+  .window__wordmark { font-size: clamp(0.85rem, 4.5vw, 1.1rem); }
+  .identity__tag { font-size: 0.78rem; }
+
+  .chip { padding: 0.45rem 0.65rem; font-size: 0.76rem; }
+  .chip__cmd { display: none; }
+
+  .kv__row { grid-template-columns: 6rem 1fr; gap: 0.6rem; }
+  .ethos__row { grid-template-columns: 1fr; gap: 0.2rem; }
+  .ethos__row dt { font-size: 0.92rem; }
+  .ethos__row dd { font-size: 0.86rem; }
+
+  .prompt__head { font-size: 0.78rem; }
+  /* font-size must be ≥16px to suppress iOS Safari auto-zoom-on-focus. */
+  .prompt__field, .prompt__input { font-size: 16px; }
+
+  /* Hide the live REPL prompt on small touch screens — typing is awkward on
+     soft keyboards. The chip nav below the buffer becomes the interface. */
+  .prompt { display: none; }
+
+  /* Reveal the mobile chip nav. Sits below the buffer; lightweight bar that
+     wraps as needed. */
+  .chips--mobile {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    padding: 0.65rem 0 0.75rem;
+    border-top: 1px solid var(--rule);
+    flex-shrink: 0;
+  }
+  .chips--mobile .chip {
+    padding: 0.5rem 0.7rem;
+    font-size: 0.82rem;
+  }
+  .chips--mobile .chip--icon {
+    min-width: 2.6rem;
+    justify-content: center;
+  }
+
+  .legend { display: none; }
+  .legend--mobile { display: flex; }
+  .legend__status { font-size: 0.85rem; }
+
+  .buffer { padding: 0.4rem 0 0.8rem; }
+}
 
 /* ==========================================================================
    REDUCED MOTION
    ========================================================================== */
-
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
+  *, *::before, *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
-
-  [data-reveal] {
-    opacity: 1;
-    transform: none;
-  }
-
-  html {
-    scroll-behavior: auto;
-  }
+  .led { animation: none; opacity: 1; }
+  /* The block-cursor animation is decorative — fully suppress it (the global
+     0.01ms override would otherwise turn the blink into a strobe). */
+  .prompt__caret,
+  .prompt__caret::before { animation: none !important; }
+  .prompt__caret { color: var(--fg) !important; }
+  .prompt__caret::before { opacity: 1 !important; }
 }
-
 
 /* ==========================================================================
-   RESPONSIVE
+   PRINT
    ========================================================================== */
-
-/* Tablet */
-@media (max-width: 900px) {
-  :root {
-    --section-py: 5.5rem;
-  }
-
-  .game-card {
-    grid-template-columns: 1fr;
-    text-align: center;
-    gap: 2rem;
-  }
-
-  .game-card__art {
-    max-width: 400px;
-    margin: 0 auto;
-  }
-
-  .game-card__features {
-    justify-content: center;
-  }
-
-  .game-card__actions {
-    justify-content: center;
-  }
-
-  .philosophy__grid {
-    grid-template-columns: 1fr;
-    max-width: 520px;
-    margin: 0 auto;
-  }
-}
-
-/* Mobile */
-@media (max-width: 768px) {
-  .nav__hamburger {
-    display: flex;
-  }
-
-  .nav__links {
-    position: fixed;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    width: 260px;
-    flex-direction: column;
-    background: rgba(17, 14, 10, 0.98);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    padding: 5rem 2rem 2rem;
-    gap: 1.5rem;
-    transform: translateX(100%);
-    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-    border-left: 1px solid rgba(212, 160, 64, 0.08);
-  }
-
-  .nav__toggle:checked ~ .nav__links {
-    transform: translateX(0);
-  }
-
-  .nav__toggle:checked ~ .nav__hamburger span:nth-child(1) {
-    transform: rotate(45deg) translate(5px, 5px);
-  }
-
-  .nav__toggle:checked ~ .nav__hamburger span:nth-child(2) {
-    opacity: 0;
-  }
-
-  .nav__toggle:checked ~ .nav__hamburger span:nth-child(3) {
-    transform: rotate(-45deg) translate(5px, -5px);
-  }
-
-  .hero__tagline {
-    letter-spacing: 0.18em;
-  }
-
-  .section__header {
-    margin-bottom: 3rem;
-  }
-}
-
-/* Small mobile */
-@media (max-width: 480px) {
-  :root {
-    --section-py: 4rem;
-    --section-px: 1.25rem;
-  }
-
-  body {
-    font-size: 16px;
-  }
-
-  .game-card {
-    padding: 1.5rem;
-  }
-
-  .game-card__actions {
-    flex-direction: column;
-  }
-
-  .btn {
-    text-align: center;
-    width: 100%;
-  }
-
-  .footer__inner {
-    flex-direction: column;
-  }
-
-  .footer__text {
-    align-items: center;
-  }
-
-  .footer__brand {
-    align-self: center;
-  }
-
-  .footer__nav {
-    gap: 0.75rem;
-  }
-
-  .footer__dot {
-    display: none;
-  }
+@media print {
+  .repl-only { display: none !important; }
+  [data-pane][hidden] { display: block !important; }
+  body { background: white; color: black; }
 }

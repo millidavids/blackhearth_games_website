@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0b0907">
+  <title>404 — command not found</title>
+  <meta name="description" content="That path doesn't exist.">
+  <link rel="icon" type="image/svg+xml" href="images/blackhearth_logo.svg">
+  <link rel="alternate icon" type="image/png" href="images/blackhearth_logo.png">
+  <style>
+    @font-face {
+      font-family: 'Press Start 2P';
+      src: url('fonts/PressStart2P-Regular.woff2') format('woff2');
+      font-weight: 400;
+      font-style: normal;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: 'Monaspace Krypton';
+      src: url('fonts/MonaspaceKrypton-Var.woff2') format('woff2-variations');
+      font-weight: 200 800;
+      font-style: oblique 0deg 11deg;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: 'Monaspace Neon';
+      src: url('fonts/MonaspaceNeon-Var.woff2') format('woff2-variations');
+      font-weight: 200 800;
+      font-style: oblique 0deg 11deg;
+      font-display: swap;
+    }
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #0b0907;
+      color: #c89cff;
+      font-family: 'Monaspace Krypton', ui-monospace, monospace; /* UI */
+      font-size: 15px;
+      line-height: 1.6;
+      min-height: 100svh;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+    .four {
+      max-width: 720px;
+      width: 100%;
+      border: 1px solid rgba(200, 156, 255, 0.18);
+      background: linear-gradient(180deg, #14110d, #0b0907);
+      padding: 2rem;
+      border-radius: 4px;
+    }
+    .four__head {
+      font-family: 'Monaspace Krypton', ui-monospace, monospace;
+      font-size: 0.78rem;
+      color: rgba(200, 156, 255, 0.55);
+      letter-spacing: 0.02em;
+      border-bottom: 1px solid rgba(200, 156, 255, 0.14);
+      padding-bottom: 0.7rem;
+      margin-bottom: 1.25rem;
+    }
+    .four__body pre {
+      font-family: 'Monaspace Neon', ui-monospace, monospace; /* terminal */
+    }
+    .four__head::before { content: '◐ ●●●   '; color: rgba(200, 156, 255, 0.55); }
+    .four__title {
+      font-family: 'Press Start 2P', monospace;
+      font-weight: 400;
+      font-size: clamp(1.5rem, 5vw, 2.25rem);
+      color: #e6d0ff;
+      letter-spacing: 0;
+      margin: 0.5rem 0 1rem;
+      line-height: 1.2;
+      text-shadow: 0 0 20px rgba(200, 156, 255, 0.30);
+    }
+    .four__body { color: rgba(200, 156, 255, 0.62); margin-bottom: 1.25rem; }
+    .four__body pre { font-family: inherit; white-space: pre-wrap; }
+    .four__body code { color: #e6d0ff; }
+    .four__chip {
+      display: inline-flex;
+      align-items: baseline;
+      gap: 0.45rem;
+      padding: 0.5rem 0.9rem;
+      border: 1px solid rgba(200, 156, 255, 0.24);
+      background: rgba(200, 156, 255, 0.04);
+      color: #c89cff;
+      text-decoration: none;
+      font-size: 0.85rem;
+      transition: border-color 0.18s ease, background 0.18s ease, color 0.18s ease;
+    }
+    .four__chip:hover { border-color: #c89cff; background: rgba(200, 156, 255, 0.10); color: #e6d0ff; }
+    .four__chip__arrow { color: rgba(200, 156, 255, 0.55); }
+  </style>
+</head>
+<body>
+  <main class="four">
+    <p class="four__head">guest@blackhearth ~</p>
+    <h1 class="four__title">404</h1>
+    <div class="four__body">
+      <pre><span style="color: rgba(200,156,255,0.55)">&gt;</span> command not found.
+
+that path doesn't exist. it may have been renamed, moved,
+or simply mistyped.</pre>
+    </div>
+    <a class="four__chip" href="/">
+      <span class="four__chip__arrow" aria-hidden="true">&rsaquo;</span>
+      <span>return home</span>
+    </a>
+  </main>
+</body>
+</html>

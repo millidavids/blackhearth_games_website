@@ -10,7 +10,7 @@ cd "${REPO_ROOT}"
 PROJECT=$(cd infra && tofu output -raw pages_project_name)
 
 mkdir -p _site
-cp -r index.html css js images _site/
+cp -r index.html 404.html css js images fonts _site/
 
 echo "Deploying to Cloudflare Pages project: ${PROJECT}..."
 npx wrangler pages deploy _site --project-name="${PROJECT}"
