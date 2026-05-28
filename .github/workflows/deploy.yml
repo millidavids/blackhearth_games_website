@@ -16,7 +16,7 @@ jobs:
       - name: Build site directory
         run: |
           mkdir -p _site
-          cp -r index.html css js images _site/
+          cp -r index.html 404.html css js images fonts _site/
 
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
