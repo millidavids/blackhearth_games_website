@@ -4,7 +4,14 @@
 *.tfstate.backup
 *.tfvars
 !*.tfvars.example
-.terraform.lock.hcl
+
+# NOT .terraform.lock.hcl — that one is committed on purpose.
+#
+# It is the provider dependency lock, it holds no secrets, and OpenTofu asks
+# for it to be tracked. Without it the version constraint in versions.tf
+# floats, so an apply from another machine can silently pull a different
+# provider minor than the one this configuration was written and tested
+# against. All three site repos track it.
 
 # Wrangler
 .wrangler/
