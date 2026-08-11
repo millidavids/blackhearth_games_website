@@ -478,6 +478,12 @@
       url: 'https://courtwizard.blackhearthgames.com',
       aliases: ['courtwizard', 'cw'],
     },
+    {
+      id: 'orbs',
+      label: 'o.r.b.s.',
+      url: 'https://orbs.blackhearthgames.com',
+      aliases: ['orb'],
+    },
   ];
   var OPEN_TARGETS = Object.create(null);
   OPEN_GAMES.forEach(function (g) {
@@ -660,7 +666,7 @@
     var subject = (args[0] || '').toLowerCase();
     if (subject === 'david') {
       appendBuffer(makeSystem(
-        '<pre><span class="accent">david yurek</span>\n  founder, sole developer, primary suspect.\n  passion: fantasy worlds, systems design, open code.\n\n  → contact   <a href="mailto:support@blackhearthgames.com">support@blackhearthgames.com</a>\n\nhe made court wizard. he is making this. say hello.</pre>'
+        '<pre><span class="accent">david yurek</span>\n  founder, sole developer, primary suspect.\n  passion: fantasy worlds, systems design, open code.\n\n  → contact   <a href="mailto:support@blackhearthgames.com">support@blackhearthgames.com</a>\n\nhe made court wizard. he is making o.r.b.s. say hello.</pre>'
       ));
       return;
     }
@@ -772,7 +778,7 @@
     games: {
       name: 'games — what is being developed',
       synopsis: 'games',
-      description: "Lists the games this studio has made. Right now: Court Wizard.",
+      description: "Lists the games this studio has made. Right now: Court Wizard, and O.R.B.S. in development.",
       examples: ['games'],
     },
     ethos: {
@@ -792,9 +798,9 @@
       synopsis: 'open <game>',
       description: "Opens the game's website in a new browser tab. This does not start the game itself — it just takes you to the game's webpage, where you can read more about it, download it, or play it.",
       arguments: [
-        ['<game>', 'court-wizard (aliases: courtwizard, cw)'],
+        ['<game>', 'court-wizard (aliases: courtwizard, cw) · orbs (alias: orb)'],
       ],
-      examples: ['open court-wizard', 'open cw'],
+      examples: ['open court-wizard', 'open cw', 'open orbs'],
     },
     roll: {
       name: 'roll — roll dice',

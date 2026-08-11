@@ -26,10 +26,10 @@ The whole site is a fake terminal window. Visitors type commands at a prompt; ou
 | Canonical | Aliases | What it does |
 |---|---|---|
 | `about` | `whoami`, `bio`, `studio` | Studio identity (founder, ethos, license) |
-| `games` | `ls`, `library` | The studio's catalogue (currently Court Wizard) |
+| `games` | `ls`, `library` | The studio's catalogue (Court Wizard; O.R.B.S. in development) |
 | `ethos` | `creed`, `philosophy`, `manifesto` | The studio's working principles |
 | `contact` | `email`, `hello`, `hi` | One-tap mailto |
-| `open <game>` | — | Visit a game's website in a new tab (e.g., `open court-wizard`) — this navigates to the standalone game site; it does not run the game itself |
+| `open <game>` | — | Visit a game's website in a new tab (e.g., `open court-wizard`, `open orbs`) — this navigates to the standalone game site; it does not run the game itself |
 | `roll <dice>` | `r`, `dice` | Dice roller — see [Dice notation](#dice-notation) |
 | `whois david` | — | Founder info |
 | `su <name>` | — | Switch the prompt's username (persists; `root` rejected) |
@@ -98,7 +98,7 @@ Persisted to `localStorage` as `bh.scheme`. There's no separate "color theme" �
 ├── css/styles.css      ← token system, theme, layout
 ├── js/main.js          ← state, commands, autosuggest, boot, hotkeys
 ├── 404.html            ← themed 404 page (no JS)
-├── LICENSE             ← MIT (the website code; Court Wizard the game is GPL-3.0)
+├── LICENSE             ← MIT (the website code; the games are licensed individually)
 ├── fonts/              ← self-hosted typefaces — see fonts/NOTICE.md
 │   ├── MonaspaceNeon-Var.woff2    ← terminal (variable)
 │   ├── MonaspaceKrypton-Var.woff2 ← UI (variable)
@@ -167,4 +167,4 @@ export CLOUDFLARE_ACCOUNT_ID="your-account-id"
 
 ## License
 
-The website code is [MIT](LICENSE). Court Wizard (the studio's current game) is separately licensed under GPL-3.0 — see [courtwizard.blackhearthgames.com](https://courtwizard.blackhearthgames.com). Future games will be licensed individually; nothing here commits to a blanket open-source policy.
+The website code is [MIT](LICENSE). The games are separately licensed: Court Wizard under GPL-3.0 — see [courtwizard.blackhearthgames.com](https://courtwizard.blackhearthgames.com) — and O.R.B.S. under GPL-3.0-or-later — see [orbs.blackhearthgames.com](https://orbs.blackhearthgames.com). Future games will be licensed individually; nothing here commits to a blanket open-source policy.

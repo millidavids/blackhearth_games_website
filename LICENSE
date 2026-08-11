@@ -25,7 +25,8 @@ SOFTWARE.
 Note: This MIT license covers the Blackhearth Games studio website
 (blackhearthgames.com — this repository).
 
-Court Wizard (the studio's current game) is a separate work, licensed
-under GPL-3.0. Future games are licensed individually — no blanket
-open-source commitment is implied. See courtwizard.blackhearthgames.com
-for Court Wizard's details.
+The studio's games are separate works, licensed individually — no
+blanket open-source commitment is implied:
+
+  Court Wizard  GPL-3.0             courtwizard.blackhearthgames.com
+  O.R.B.S.      GPL-3.0-or-later    orbs.blackhearthgames.com
